@@ -12,8 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5f65c513740cf974099f6475ea53048f, type: 3}
   m_Name: Speed
   m_EditorClassIdentifier: Assembly-CSharp::ResourceDefinition
-  <Id>k__BackingField: 
-  <DisplayName>k__BackingField: 
-  <DefaultValue>k__BackingField: 0
+  <Id>k__BackingField: speed
+  <DisplayName>k__BackingField: Speed
+  <DefaultValue>k__BackingField: 1
   <DecayPerTurn>k__BackingField: 0
   <OwnershipScope>k__BackingField: 0

@@ -12,6 +12,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d5ab327f02e19974e888a0308064e605, type: 3}
   m_Name: SpeedBased
   m_EditorClassIdentifier: Assembly-CSharp::ResourceRankTurnOrder
-  <EnforceRounds>k__BackingField: 0
-  <OrderingResource>k__BackingField: {fileID: 0}
+  <EnforceRounds>k__BackingField: 1
+  <OrderingResource>k__BackingField: {fileID: 11400000, guid: a292fa85842dd9d4db186d6d42a7e747, type: 2}
   <Descending>k__BackingField: 1

@@ -620,6 +620,7 @@ MonoBehaviour:
   enemyUnits:
   - {fileID: 11400000, guid: fddde85e99d87844593fc691fefef0bb, type: 2}
   - {fileID: 11400000, guid: ccecc320b6e8e4f46bae19e39d72b085, type: 2}
+  turnOrderStrategy: {fileID: 11400000, guid: 0951369fd6fdfd14d87b89c603bc116d, type: 2}
 --- !u!4 &1239438610
 Transform:
   m_ObjectHideFlags: 0

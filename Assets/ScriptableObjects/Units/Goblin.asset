@@ -15,13 +15,16 @@ MonoBehaviour:
   <Id>k__BackingField: goblin
   <DisplayName>k__BackingField: Goblin
   <MaxHp>k__BackingField: 5
-  <Speed>k__BackingField: 10
   <BaseAttack>k__BackingField: 5
   <BaseDefense>k__BackingField: 2
   <Resources>k__BackingField:
   - resource: {fileID: 11400000, guid: 75657c3eb0818ca438ec9ae3e84cfb62, type: 2}
     initialValue: 1
     resetToValueOnTurnStart: 1
+    turnStartValue: 1
+  - resource: {fileID: 11400000, guid: a292fa85842dd9d4db186d6d42a7e747, type: 2}
+    initialValue: 5
+    resetToValueOnTurnStart: 0
     turnStartValue: 1
   <Actions>k__BackingField:
   - {fileID: 11400000, guid: 3ac6e51b2348aa34398647b889ba2b70, type: 2}

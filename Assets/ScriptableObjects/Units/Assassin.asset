@@ -15,7 +15,6 @@ MonoBehaviour:
   <Id>k__BackingField: assassin
   <DisplayName>k__BackingField: Assassin
   <MaxHp>k__BackingField: 10
-  <Speed>k__BackingField: 10
   <BaseAttack>k__BackingField: 5
   <BaseDefense>k__BackingField: 2
   <Resources>k__BackingField:
@@ -23,5 +22,9 @@ MonoBehaviour:
     initialValue: 1
     resetToValueOnTurnStart: 1
     turnStartValue: 1
+  - resource: {fileID: 11400000, guid: a292fa85842dd9d4db186d6d42a7e747, type: 2}
+    initialValue: 15
+    resetToValueOnTurnStart: 0
+    turnStartValue: 0
   <Actions>k__BackingField:
   - {fileID: 11400000, guid: b14dcf6297edbfc40b49f37b3f237696, type: 2}
