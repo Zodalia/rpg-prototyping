@@ -1,0 +1,25 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 98b79c0979743e04f97fb60ea773974f, type: 3}
+  m_Name: Hero
+  m_EditorClassIdentifier: Assembly-CSharp::UnitDefinition
+  <Id>k__BackingField: hero
+  <DisplayName>k__BackingField: Hero
+  <MaxHp>k__BackingField: 20
+  <MaxMp>k__BackingField: 0
+  <Speed>k__BackingField: 10
+  <BaseAttack>k__BackingField: 5
+  <BaseDefense>k__BackingField: 2
+  <Actions>k__BackingField:
+  - {fileID: 11400000, guid: 3ac6e51b2348aa34398647b889ba2b70, type: 2}
+  - {fileID: 11400000, guid: 3815eb045aaeb134aa16dba5d84d8f5c, type: 2}
+  - {fileID: 11400000, guid: 9adb7a19acdacc84c8c521b8e6013f18, type: 2}
