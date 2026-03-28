@@ -16,10 +16,23 @@ MonoBehaviour:
   <DisplayName>k__BackingField: Poison Stab
   <Description>k__BackingField: 
   <Targeting>k__BackingField: 2
-  <MpCost>k__BackingField: 0
-  <ApCost>k__BackingField: 1
   <Cooldown>k__BackingField: 0
   <SpeedModifier>k__BackingField: 0
+  <ResourceRequirements>k__BackingField:
+  - resource: {fileID: 11400000, guid: 75657c3eb0818ca438ec9ae3e84cfb62, type: 2}
+    amount: 1
   <Effects>k__BackingField:
-  - {fileID: 11400000, guid: 1fe7cf1fc896bde4494fd9f61a90c6de, type: 2}
-  - {fileID: 11400000, guid: 2aae0d9fc81a40641b7d01bb2704097e, type: 2}
+  - rid: 4305622216186527805
+  - rid: 4305622216186527806
+  references:
+    version: 2
+    RefIds:
+    - rid: 4305622216186527805
+      type: {class: DamageEffectConfig, ns: , asm: Assembly-CSharp}
+      data:
+        power: 1
+    - rid: 4305622216186527806
+      type: {class: ApplyStatusEffectConfig, ns: , asm: Assembly-CSharp}
+      data:
+        status: {fileID: 11400000, guid: 6dcd453369adcee4ca22dfebbf34b9b0, type: 2}
+        duration: 3

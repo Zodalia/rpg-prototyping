@@ -8,13 +8,12 @@ public sealed class UnitState
     public UnitDefinition Definition { get; }
 
     public int Hp { get; set; }
-    public int Mp { get; set; }
-    public int ActionPoints { get; set; }
     public int TimelinePosition { get; set; }
     public bool IsAlive { get; set; } = true;
 
     public List<StatusInstance> Statuses { get; } = new();
     public Dictionary<string, int> Cooldowns { get; } = new();
+    public Dictionary<string, ResourceInstance> Resources { get; } = new();
 
     public UnitState(string unitId, string team, UnitDefinition definition)
     {
@@ -23,7 +22,6 @@ public sealed class UnitState
         Definition = definition;
 
         Hp = definition.MaxHp;
-        Mp = definition.MaxMp;
     }
 
     public int GetAttack()

@@ -5,8 +5,13 @@ public sealed class ActionExecutor
         var actor = execution.Actor;
         var action = execution.Action;
 
-        actor.Mp -= action.MpCost;
-        actor.ActionPoints -= action.ApCost;
+        foreach (var req in action.ResourceRequirements)
+        {
+            if (req.Resource == null)
+                continue;
+
+            rules.SpendResource(state, actor, req.Resource.Id, req.Amount);
+        }
 
         if (action.Cooldown > 0)
             actor.Cooldowns[action.Id] = action.Cooldown;

@@ -10,6 +10,9 @@ public sealed class BattleState
     public string WinnerTeam { get; set; }
     public List<string> Log { get; } = new();
 
+    public Dictionary<string, Dictionary<string, ResourceInstance>> TeamResources { get; } = new();
+    public Dictionary<string, ResourceInstance> GlobalResources { get; } = new();
+
     public IEnumerable<UnitState> LivingUnits => Units.Where(u => u.IsAlive);
 
     public IEnumerable<UnitState> GetLivingTeam(string team) =>

@@ -1,15 +1,18 @@
+using System;
 using UnityEngine;
 
-[CreateAssetMenu(menuName = "Combat/Effects/Damage")]
-public sealed class DamageEffectDefinition : EffectDefinition
+[Serializable]
+public sealed class DamageEffectConfig : EffectConfig
 {
-    [field: SerializeField] public int Power { get; private set; } = 0;
+    [SerializeField] private int power = 0;
+
+    public override string DisplayName => "Damage";
 
     public override void Apply(BattleState state, ActionExecution execution, CombatRules rules)
     {
         foreach (var target in execution.Targets)
         {
-            int damage = rules.CalculateDamage(execution.Actor, target, Power);
+            int damage = rules.CalculateDamage(execution.Actor, target, power + execution.PowerModifier);
             target.Hp -= damage;
 
             state.Log.Add($"{execution.Actor.Definition.DisplayName} hits {target.Definition.DisplayName} for {damage}");

@@ -16,9 +16,18 @@ MonoBehaviour:
   <DisplayName>k__BackingField: Focus
   <Description>k__BackingField: 
   <Targeting>k__BackingField: 0
-  <MpCost>k__BackingField: 0
-  <ApCost>k__BackingField: 1
   <Cooldown>k__BackingField: 0
   <SpeedModifier>k__BackingField: 0
+  <ResourceRequirements>k__BackingField:
+  - resource: {fileID: 11400000, guid: 75657c3eb0818ca438ec9ae3e84cfb62, type: 2}
+    amount: 1
   <Effects>k__BackingField:
-  - {fileID: 11400000, guid: b433855804cbd7a46ab7101eaba2343c, type: 2}
+  - rid: 4305622216186527804
+  references:
+    version: 2
+    RefIds:
+    - rid: 4305622216186527804
+      type: {class: GainResourceEffectConfig, ns: , asm: Assembly-CSharp}
+      data:
+        resource: {fileID: 11400000, guid: 75657c3eb0818ca438ec9ae3e84cfb62, type: 2}
+        amount: 1

@@ -38,10 +38,18 @@ public sealed class BattleController : MonoBehaviour
         int idCounter = 0;
 
         foreach (var def in playerUnits)
-            State.Units.Add(new UnitState($"P{idCounter++}", "Player", def));
+        {
+            var unit = new UnitState($"P{idCounter++}", "Player", def);
+            State.Units.Add(unit);
+            _rules.InitializeResources(State, unit);
+        }
 
         foreach (var def in enemyUnits)
-            State.Units.Add(new UnitState($"E{idCounter++}", "Enemy", def));
+        {
+            var unit = new UnitState($"E{idCounter++}", "Enemy", def);
+            State.Units.Add(unit);
+            _rules.InitializeResources(State, unit);
+        }
 
         BeginNextTurn();
         StateChanged?.Invoke();

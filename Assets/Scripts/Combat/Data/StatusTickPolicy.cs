@@ -11,3 +11,10 @@ public enum TeamTrackingScope
     Enemies,
     All
 }
+
+public enum ResourceOwnershipScope
+{
+    Unit,
+    Team,
+    Global
+}

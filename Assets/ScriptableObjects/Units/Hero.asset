@@ -15,10 +15,14 @@ MonoBehaviour:
   <Id>k__BackingField: hero
   <DisplayName>k__BackingField: Hero
   <MaxHp>k__BackingField: 20
-  <MaxMp>k__BackingField: 0
   <Speed>k__BackingField: 10
   <BaseAttack>k__BackingField: 5
   <BaseDefense>k__BackingField: 2
+  <Resources>k__BackingField:
+  - resource: {fileID: 11400000, guid: 75657c3eb0818ca438ec9ae3e84cfb62, type: 2}
+    initialValue: 1
+    resetToValueOnTurnStart: 1
+    turnStartValue: 1
   <Actions>k__BackingField:
   - {fileID: 11400000, guid: 3ac6e51b2348aa34398647b889ba2b70, type: 2}
   - {fileID: 11400000, guid: 3815eb045aaeb134aa16dba5d84d8f5c, type: 2}
