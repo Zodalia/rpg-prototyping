@@ -10,6 +10,8 @@ public sealed class BattleState
     public string WinnerTeam { get; set; }
     public List<string> Log { get; } = new();
 
+    public HashSet<string> UnitsActedThisRound { get; } = new();
+
     public Dictionary<string, Dictionary<string, ResourceInstance>> TeamResources { get; } = new();
     public Dictionary<string, ResourceInstance> GlobalResources { get; } = new();
 

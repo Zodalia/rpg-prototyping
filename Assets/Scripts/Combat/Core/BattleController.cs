@@ -9,6 +9,9 @@ public sealed class BattleController : MonoBehaviour
     [SerializeField] private List<UnitDefinition> playerUnits = new();
     [SerializeField] private List<UnitDefinition> enemyUnits = new();
 
+    [Header("Turn Order")]
+    [SerializeField] private TurnOrderStrategy turnOrderStrategy;
+
     public BattleState State { get; private set; }
 
     public event Action StateChanged;
@@ -60,7 +63,9 @@ public sealed class BattleController : MonoBehaviour
         if (CheckBattleEnd())
             return;
 
-        State.ActiveUnit = _rules.GetNextActiveUnit(State);
+        State.ActiveUnit = turnOrderStrategy != null
+            ? turnOrderStrategy.SelectNext(State, _rules)
+            : _rules.GetNextActiveUnit(State);
         _rules.OnTurnStart(State, State.ActiveUnit);
 
         StateChanged?.Invoke();
@@ -81,6 +86,8 @@ public sealed class BattleController : MonoBehaviour
     {
         _executor.Execute(State, execution, _rules);
         _rules.OnTurnEnd(State, execution.Actor);
+
+        State.UnitsActedThisRound.Add(execution.Actor.UnitId);
 
         StateChanged?.Invoke();
 

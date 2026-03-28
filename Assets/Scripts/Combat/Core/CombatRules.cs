@@ -6,10 +6,16 @@ public sealed class CombatRules
 {
     public UnitState GetNextActiveUnit(BattleState state)
     {
-        // Very simple baseline. Replace later with timeline logic if needed.
-        return state.LivingUnits
-            .OrderByDescending(u => u.Definition.Speed)
-            .FirstOrDefault(u => u != state.ActiveUnit);
+        // Round-robin fallback when no TurnOrderStrategy is assigned.
+        var living = state.LivingUnits.ToList();
+        if (living.Count == 0) return null;
+
+        if (state.ActiveUnit == null)
+            return living[0];
+
+        int currentIndex = living.IndexOf(state.ActiveUnit);
+        int nextIndex = (currentIndex + 1) % living.Count;
+        return living[nextIndex];
     }
 
     public List<ActionDefinition> GetAvailableActions(BattleState state, UnitState unit)
