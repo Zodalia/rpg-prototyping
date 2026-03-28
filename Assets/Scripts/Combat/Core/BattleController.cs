@@ -104,4 +104,6 @@ public sealed class BattleController : MonoBehaviour
         BattleEnded?.Invoke(State.WinnerTeam);
         return true;
     }
+
+    public void NotifyStateChanged() => StateChanged?.Invoke();
 }
