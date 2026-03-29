@@ -98,12 +98,16 @@ public sealed class BattleController : MonoBehaviour
         State.UnitsActedThisRound.Add(execution.Actor.UnitId);
 
         StateChanged?.Invoke();
+    }
 
-        if (!CheckBattleEnd())
-        {
-            State.TurnNumber++;
-            BeginNextTurn();
-        }
+    public bool AdvanceTurn()
+    {
+        if (CheckBattleEnd())
+            return false;
+
+        State.TurnNumber++;
+        BeginNextTurn();
+        return true;
     }
 
     private bool CheckBattleEnd()
