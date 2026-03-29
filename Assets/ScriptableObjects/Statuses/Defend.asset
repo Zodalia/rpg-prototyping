@@ -14,6 +14,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::StatusDefinition
   <Id>k__BackingField: defend
   <DisplayName>k__BackingField: Defend
+  <Icon>k__BackingField: {fileID: 21300000, guid: 31e9e619a1ebace4ab3c9073eba06534, type: 3}
+  <IconColor>k__BackingField:
+    serializedVersion: 2
+    rgba: 4294950656
   <AttackModifier>k__BackingField: 0
   <DefenseModifier>k__BackingField: 3
   <DamagePerTick>k__BackingField: 0

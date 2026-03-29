@@ -5,6 +5,8 @@ public sealed class StatusDefinition : ScriptableObject
 {
     [field: SerializeField] public string Id { get; private set; }
     [field: SerializeField] public string DisplayName { get; private set; }
+    [field: SerializeField] public Sprite Icon { get; private set; }
+    [field: SerializeField] public Color32 IconColor { get; private set; }
 
     [field: SerializeField] public int AttackModifier { get; private set; } = 0;
     [field: SerializeField] public int DefenseModifier { get; private set; } = 0;

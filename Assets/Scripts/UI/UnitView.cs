@@ -9,7 +9,8 @@ public sealed class UnitView : MonoBehaviour
     [SerializeField] private TextMeshProUGUI nameLabel;
     [SerializeField] private TextMeshProUGUI hpLabel;
     [SerializeField] private Slider hpBar;
-    [SerializeField] private TextMeshProUGUI statusLabel;
+    [SerializeField] private Transform statusParent;
+    [SerializeField] private GameObject statusPrefab;
     [SerializeField] private Button targetButton;
     [SerializeField] private Image backgroundImage;
 
@@ -41,10 +42,28 @@ public sealed class UnitView : MonoBehaviour
         hpBar.maxValue = Unit.Definition.MaxHp;
         hpBar.value = Unit.Hp;
 
+        foreach (Transform child in statusParent)
+        {
+            Destroy(child.gameObject);
+        }
+
         if (Unit.Statuses.Count > 0)
-            statusLabel.text = string.Join(", ", Unit.Statuses.Select(s => $"{s.Definition.DisplayName}({s.RemainingTurns})"));
-        else
-            statusLabel.text = "";
+        {
+            foreach (var status in Unit.Statuses)
+            {
+                var statusView = Instantiate(statusPrefab, statusParent);
+                var statusImage = statusView.GetComponent<Image>();
+                if (statusImage != null)
+                {
+                    statusImage.sprite = status.Definition.Icon;
+                    statusImage.color = status.Definition.IconColor;
+                }
+                var statusLabel = statusView.GetComponentInChildren<TextMeshProUGUI>();
+                if (statusLabel != null)                {
+                    statusLabel.text = status.RemainingTurns.ToString();
+                }
+            }
+        }
 
         if (!Unit.IsAlive)
         {
