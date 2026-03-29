@@ -16,6 +16,8 @@ MonoBehaviour:
   <DisplayName>k__BackingField: Poison
   <AttackModifier>k__BackingField: 0
   <DefenseModifier>k__BackingField: 0
-  <DamagePerTick>k__BackingField: 2
+  <DamagePerTick>k__BackingField: 1
   <StunsUnit>k__BackingField: 0
   <DefaultDuration>k__BackingField: 1
+  <TickTiming>k__BackingField: 1
+  <TrackingScope>k__BackingField: 0

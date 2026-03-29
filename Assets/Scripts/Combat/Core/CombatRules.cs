@@ -214,7 +214,7 @@ public sealed class CombatRules
                     if (status.Definition.DamagePerTick > 0)
                     {
                         unit.Hp -= status.Definition.DamagePerTick;
-                        state.Log.Add($"{unit.Definition.DisplayName} takes {status.Definition.DamagePerTick} from {status.Definition.DisplayName}");
+                        state.EventBus.Raise(new StatusTickEvent(state.TurnNumber, unit, status.Definition, status.Definition.DamagePerTick));
                     }
 
                     status.RemainingTurns--;
@@ -226,7 +226,7 @@ public sealed class CombatRules
                 }
                 else
                 {
-                    state.Log.Add($"{unit.Definition.DisplayName} loses {status.Definition.DisplayName}");
+                    state.EventBus.Raise(new StatusExpiredEvent(state.TurnNumber, unit, status.Definition));
                 }
             }
 
@@ -237,7 +237,7 @@ public sealed class CombatRules
             {
                 unit.Hp = 0;
                 unit.IsAlive = false;
-                state.Log.Add($"{unit.Definition.DisplayName} is defeated");
+                state.EventBus.Raise(new UnitDefeatedEvent(state.TurnNumber, unit));
             }
         }
     }

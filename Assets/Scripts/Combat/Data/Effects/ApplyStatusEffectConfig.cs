@@ -18,7 +18,7 @@ public sealed class ApplyStatusEffectConfig : EffectConfig
         {
             var appliedDuration = duration > 0 ? duration : status.DefaultDuration;
             target.Statuses.Add(new StatusInstance(status, appliedDuration, status.TickTiming, status.TrackingScope, target.Team));
-            state.Log.Add($"{target.Definition.DisplayName} gains {status.DisplayName}");
+            state.EventBus.Raise(new StatusAppliedEvent(state.TurnNumber, target, status, appliedDuration));
         }
     }
 }

@@ -9,6 +9,7 @@ public sealed class BattleState
     public bool IsBattleOver { get; set; }
     public string WinnerTeam { get; set; }
     public List<string> Log { get; } = new();
+    public BattleEventBus EventBus { get; set; }
 
     public HashSet<string> UnitsActedThisRound { get; } = new();
 

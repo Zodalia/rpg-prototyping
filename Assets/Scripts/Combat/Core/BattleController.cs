@@ -21,6 +21,7 @@ public sealed class BattleController : MonoBehaviour
     private CombatRules _rules;
     private ActionExecutor _executor;
     private EnemyAi _enemyAi;
+    private CombatLogger _logger;
 
     private void Awake()
     {
@@ -36,7 +37,11 @@ public sealed class BattleController : MonoBehaviour
 
     public void StartBattle()
     {
+        _logger?.Unsubscribe();
+
         State = new BattleState();
+        State.EventBus = new BattleEventBus();
+        _logger = new CombatLogger(State.EventBus, State.Log);
 
         int idCounter = 0;
 
@@ -66,6 +71,8 @@ public sealed class BattleController : MonoBehaviour
         State.ActiveUnit = turnOrderStrategy != null
             ? turnOrderStrategy.SelectNext(State, _rules)
             : _rules.GetNextActiveUnit(State);
+
+        State.EventBus.Raise(new TurnStartedEvent(State.TurnNumber, State.ActiveUnit));
         _rules.OnTurnStart(State, State.ActiveUnit);
 
         StateChanged?.Invoke();
@@ -87,6 +94,7 @@ public sealed class BattleController : MonoBehaviour
         _executor.Execute(State, execution, _rules);
         _rules.OnTurnEnd(State, execution.Actor);
 
+        State.EventBus.Raise(new TurnEndedEvent(State.TurnNumber, execution.Actor));
         State.UnitsActedThisRound.Add(execution.Actor.UnitId);
 
         StateChanged?.Invoke();
@@ -108,6 +116,7 @@ public sealed class BattleController : MonoBehaviour
 
         State.IsBattleOver = true;
         State.WinnerTeam = anyPlayers ? "Player" : "Enemy";
+        State.EventBus.Raise(new BattleEndedEvent(State.TurnNumber, State.WinnerTeam));
         BattleEnded?.Invoke(State.WinnerTeam);
         return true;
     }

@@ -16,7 +16,7 @@ public sealed class ActionExecutor
         if (action.Cooldown > 0)
             actor.Cooldowns[action.Id] = action.Cooldown;
 
-        state.Log.Add($"{actor.Definition.DisplayName} uses {action.DisplayName}");
+        state.EventBus.Raise(new ActionUsedEvent(state.TurnNumber, actor, action, execution.Targets));
 
         foreach (var effect in action.Effects)
         {
