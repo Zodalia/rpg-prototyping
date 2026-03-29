@@ -1,0 +1,27 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 98b79c0979743e04f97fb60ea773974f, type: 3}
+  m_Name: FireMage
+  m_EditorClassIdentifier: Assembly-CSharp::UnitDefinition
+  <Id>k__BackingField: firemage
+  <DisplayName>k__BackingField: Fire Mage
+  <MaxHp>k__BackingField: 10
+  <BaseAttack>k__BackingField: 5
+  <BaseDefense>k__BackingField: 2
+  <Resources>k__BackingField:
+  - resource: {fileID: 11400000, guid: d943ed5ad5db6ba4883f801e78b5b7a9, type: 2}
+    initialValue: 1
+    resetToValueOnTurnStart: 0
+    turnStartValue: 0
+  <Actions>k__BackingField:
+  - {fileID: 11400000, guid: cb486218b6e668c4a8813f4bdf75d2d3, type: 2}
+  - {fileID: 11400000, guid: 75c071ddac4fdbc4ba3e66d3e93f1020, type: 2}
