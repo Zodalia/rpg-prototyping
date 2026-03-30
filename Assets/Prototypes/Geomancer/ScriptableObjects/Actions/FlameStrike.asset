@@ -10,34 +10,34 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: b4734ebd6955d114b8fd85811864b7ba, type: 3}
-  m_Name: Fireball
+  m_Name: FlameStrike
   m_EditorClassIdentifier: Assembly-CSharp::ActionDefinition
-  <Id>k__BackingField: fireball
-  <DisplayName>k__BackingField: Fireball
+  <Id>k__BackingField: flamestrike
+  <DisplayName>k__BackingField: Flame Strike
   <Description>k__BackingField: 
-  <Targeting>k__BackingField: 4
-  <Cooldown>k__BackingField: 0
+  <Targeting>k__BackingField: 2
+  <Cooldown>k__BackingField: 2
   <ResourceRequirements>k__BackingField:
   - resource: {fileID: 11400000, guid: 33efa4d68c2eb564e85d0fc55e51f984, type: 2}
-    amount: 4
+    amount: 2
   <Effects>k__BackingField:
-  - rid: 4305622238362861630
-  - rid: 4305622238362861631
-  - rid: 4305622238362861637
+  - rid: 4305622238362861635
+  - rid: 4305622238362861636
+  - rid: 4305622238362861638
   references:
     version: 2
     RefIds:
-    - rid: 4305622238362861630
+    - rid: 4305622238362861635
       type: {class: DamageEffectConfig, ns: , asm: Assembly-CSharp}
       data:
-        power: 10
-    - rid: 4305622238362861631
-      type: {class: GainResourceEffectConfig, ns: , asm: Assembly-CSharp}
-      data:
-        resource: {fileID: 11400000, guid: d943ed5ad5db6ba4883f801e78b5b7a9, type: 2}
-        amount: 10
-    - rid: 4305622238362861637
+        power: 3
+    - rid: 4305622238362861636
       type: {class: SpendResourceEffectConfig, ns: , asm: Assembly-CSharp}
       data:
         resource: {fileID: 11400000, guid: 33efa4d68c2eb564e85d0fc55e51f984, type: 2}
-        amount: 4
+        amount: 2
+    - rid: 4305622238362861638
+      type: {class: GainResourceEffectConfig, ns: , asm: Assembly-CSharp}
+      data:
+        resource: {fileID: 11400000, guid: d943ed5ad5db6ba4883f801e78b5b7a9, type: 2}
+        amount: 3

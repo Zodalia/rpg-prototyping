@@ -5,6 +5,8 @@ public sealed class ActionExecutor
         var actor = execution.Actor;
         var action = execution.Action;
 
+        state.EventBus.BeginGroup();
+
         foreach (var req in action.ResourceRequirements)
         {
             if (req.Resource == null)
@@ -23,5 +25,7 @@ public sealed class ActionExecutor
             if (effect != null)
                 effect.Apply(state, execution, rules);
         }
+
+        state.EventBus.EndGroup();
     }
 }

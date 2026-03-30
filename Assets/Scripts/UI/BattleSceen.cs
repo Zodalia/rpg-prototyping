@@ -22,19 +22,26 @@ public sealed class BattleScreen : MonoBehaviour
 
     [Header("Log")]
     [SerializeField] private TextMeshProUGUI logText;
+    [SerializeField] private int maxLogLines = 12;
+
+    [Header("Resources")]
+    [SerializeField] private ResourceBarView resourceBarView;
 
     [Header("Event Pacing")]
-    [SerializeField] private float eventDelay = 1f;
+    [SerializeField] private float groupDelay = 1f;
+    [SerializeField] private float intraGroupDelay = 0.15f;
 
     private readonly List<UnitView> _unitViews = new();
     private UnitState _pendingActor;
     private ActionDefinition _pendingAction;
 
-    private int _displayedLogCount;
+    private readonly Queue<BattleEventGroup> _pendingGroups = new();
+    private readonly List<string> _logLines = new();
     private bool _isProcessingLog;
     private Coroutine _processingCoroutine;
     private UnitState _deferredActor;
     private List<ActionDefinition> _deferredActions;
+    private BattleEventBus _subscribedBus;
 
     private void OnEnable()
     {
@@ -55,6 +62,12 @@ public sealed class BattleScreen : MonoBehaviour
         battleController.PlayerInputRequested -= OnPlayerInputRequested;
         battleController.BattleEnded -= OnBattleEnded;
 
+        if (_subscribedBus != null)
+        {
+            _subscribedBus.GroupRaised -= OnGroupRaised;
+            _subscribedBus = null;
+        }
+
         if (cancelTargetingButton != null)
             cancelTargetingButton.onClick.RemoveListener(CancelTargeting);
     }
@@ -64,10 +77,32 @@ public sealed class BattleScreen : MonoBehaviour
         if (battleController.State == null)
             return;
 
+        SubscribeToEventBus();
         SpawnUnitViewsIfNeeded();
         RefreshUnitViews();
 
-        if (!_isProcessingLog && battleController.State.Log.Count > _displayedLogCount)
+        if (!_isProcessingLog && _pendingGroups.Count > 0)
+            _processingCoroutine = StartCoroutine(ProcessLog());
+    }
+
+    private void SubscribeToEventBus()
+    {
+        var bus = battleController.State.EventBus;
+        if (bus == _subscribedBus)
+            return;
+
+        if (_subscribedBus != null)
+            _subscribedBus.GroupRaised -= OnGroupRaised;
+
+        _subscribedBus = bus;
+        _subscribedBus.GroupRaised += OnGroupRaised;
+    }
+
+    private void OnGroupRaised(BattleEventGroup group)
+    {
+        _pendingGroups.Enqueue(group);
+
+        if (!_isProcessingLog)
             _processingCoroutine = StartCoroutine(ProcessLog());
     }
 
@@ -91,13 +126,29 @@ public sealed class BattleScreen : MonoBehaviour
 
         while (true)
         {
-            // Reveal log entries one at a time
-            while (_displayedLogCount < battleController.State.Log.Count)
+            while (_pendingGroups.Count > 0)
             {
-                _displayedLogCount++;
-                RefreshUnitViews();
-                RefreshLog();
-                yield return new WaitForSeconds(eventDelay);
+                var group = _pendingGroups.Dequeue();
+
+                for (int i = 0; i < group.Events.Count; i++)
+                {
+                    var text = FormatEvent(group.Events[i]);
+                    if (text != null)
+                    {
+                        _logLines.Add(text);
+                        RefreshUnitViews();
+                        RefreshLog();
+
+                        if (i < group.Events.Count - 1)
+                            yield return new WaitForSeconds(intraGroupDelay);
+                    }
+                }
+
+                // Delay between groups (skip if that was the last queued group and nothing more is coming)
+                if (_pendingGroups.Count > 0)
+                    yield return new WaitForSeconds(groupDelay);
+                else
+                    yield return new WaitForSeconds(groupDelay);
             }
 
             // Player input is waiting — hand off control
@@ -108,15 +159,15 @@ public sealed class BattleScreen : MonoBehaviour
             if (battleController.State.IsBattleOver)
                 break;
 
-            // Advance to next turn (may produce more log entries from enemy actions / status ticks)
+            // Advance to next turn (may produce more groups from enemy actions / status ticks)
             battleController.AdvanceTurn();
             yield return null; // let synchronous events settle
 
             if (battleController.State.IsBattleOver)
                 break;
 
-            // No new log entries — next turn is ready with nothing to show
-            if (_displayedLogCount >= battleController.State.Log.Count)
+            // No new groups — next turn is ready with nothing to show
+            if (_pendingGroups.Count == 0)
                 break;
         }
 
@@ -133,16 +184,39 @@ public sealed class BattleScreen : MonoBehaviour
         }
     }
 
+    private string FormatEvent(BattleEvent e)
+    {
+        return e switch
+        {
+            ActionUsedEvent action =>
+                $"{action.Actor.Definition.DisplayName} uses {action.Action.DisplayName}",
+            DamageDealtEvent damage =>
+                $"{damage.Actor.Definition.DisplayName} hits {damage.Target.Definition.DisplayName} for {damage.Amount}",
+            UnitDefeatedEvent defeated =>
+                $"{defeated.Unit.Definition.DisplayName} is defeated",
+            StatusAppliedEvent statusApplied =>
+                $"{statusApplied.Target.Definition.DisplayName} gains {statusApplied.Status.DisplayName}",
+            StatusTickEvent statusTick =>
+                $"{statusTick.Unit.Definition.DisplayName} takes {statusTick.Damage} from {statusTick.Status.DisplayName}",
+            StatusExpiredEvent statusExpired =>
+                $"{statusExpired.Unit.Definition.DisplayName} loses {statusExpired.Status.DisplayName}",
+            _ => null
+        };
+    }
+
     private void RefreshUnitViews()
     {
         var activeUnit = battleController.State.ActiveUnit;
         foreach (var view in _unitViews)
             view.Refresh(activeUnit);
+
+        if (resourceBarView != null)
+            resourceBarView.Refresh(battleController.State);
     }
 
     private void RefreshLog()
     {
-        var entries = battleController.State.Log.Take(_displayedLogCount).TakeLast(12);
+        var entries = _logLines.TakeLast(maxLogLines);
         logText.text = string.Join("\n", entries);
     }
 

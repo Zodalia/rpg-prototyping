@@ -14,6 +14,11 @@ public sealed class UnitView : MonoBehaviour
     [SerializeField] private Button targetButton;
     [SerializeField] private Image backgroundImage;
 
+    [Header("Resources")]
+    [SerializeField] private Transform resourceParent;
+    [SerializeField] private GameObject resourceEntryPrefab;
+    [SerializeField] private bool showResources;
+
     [Header("Colors")]
     [SerializeField] private Color normalColor = new Color(0.2f, 0.2f, 0.2f, 0.8f);
     [SerializeField] private Color activeColor = new Color(0.1f, 0.4f, 0.1f, 0.9f);
@@ -79,6 +84,43 @@ public sealed class UnitView : MonoBehaviour
         {
             backgroundImage.color = normalColor;
             nameLabel.alpha = 1f;
+        }
+
+        RefreshResources();
+    }
+
+    private void RefreshResources()
+    {
+        if (resourceParent == null || resourceEntryPrefab == null) return;
+
+        foreach (Transform child in resourceParent)
+            Destroy(child.gameObject);
+
+        if (!showResources || Unit == null || Unit.Resources.Count == 0)
+        {
+            if (resourceParent != null)
+                resourceParent.gameObject.SetActive(false);
+            return;
+        }
+
+        resourceParent.gameObject.SetActive(true);
+
+        foreach (var kvp in Unit.Resources.Where(kvp => kvp.Value.Definition != null && kvp.Value.Definition.PlayerFacing))
+        {
+            var entry = Instantiate(resourceEntryPrefab, resourceParent);
+            var icon = entry.GetComponent<Image>();
+            if (icon != null && kvp.Value.Definition != null)
+            {
+                icon.sprite = kvp.Value.Definition.Icon;
+                icon.color = kvp.Value.Definition.IconColor;
+            }
+
+            var label = entry.GetComponentInChildren<TextMeshProUGUI>();
+            if (label != null)
+            {
+
+                label.text = kvp.Value.CurrentValue.ToString();
+            }
         }
     }
 

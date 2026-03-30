@@ -5,7 +5,9 @@ public sealed class ResourceDefinition : ScriptableObject
 {
     [field: SerializeField] public string Id { get; private set; }
     [field: SerializeField] public string DisplayName { get; private set; }
-
+    [field: SerializeField] public Sprite Icon { get; private set; }
+    [field: SerializeField] public Color32 IconColor { get; private set; } = new Color32(255, 255, 255, 255);
+    [field: SerializeField] public bool PlayerFacing { get; private set; }
     [field: SerializeField] public int DefaultValue { get; private set; } = 0;
     [field: SerializeField] public int DecayPerTurn { get; private set; } = 0;
     [field: SerializeField] public ResourceOwnershipScope OwnershipScope { get; private set; } = ResourceOwnershipScope.Unit;

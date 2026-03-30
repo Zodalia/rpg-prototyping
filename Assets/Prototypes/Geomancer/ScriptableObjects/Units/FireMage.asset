@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::UnitDefinition
   <Id>k__BackingField: firemage
   <DisplayName>k__BackingField: Fire Mage
-  <MaxHp>k__BackingField: 10
+  <MaxHp>k__BackingField: 15
   <BaseAttack>k__BackingField: 5
   <BaseDefense>k__BackingField: 2
   <Resources>k__BackingField:
@@ -24,4 +24,5 @@ MonoBehaviour:
     turnStartValue: 0
   <Actions>k__BackingField:
   - {fileID: 11400000, guid: cb486218b6e668c4a8813f4bdf75d2d3, type: 2}
+  - {fileID: 11400000, guid: 14da1224c47b516459f4ddcb84299c20, type: 2}
   - {fileID: 11400000, guid: 75c071ddac4fdbc4ba3e66d3e93f1020, type: 2}

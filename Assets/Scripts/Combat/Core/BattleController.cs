@@ -21,7 +21,6 @@ public sealed class BattleController : MonoBehaviour
     private CombatRules _rules;
     private ActionExecutor _executor;
     private EnemyAi _enemyAi;
-    private CombatLogger _logger;
 
     private void Awake()
     {
@@ -37,11 +36,8 @@ public sealed class BattleController : MonoBehaviour
 
     public void StartBattle()
     {
-        _logger?.Unsubscribe();
-
         State = new BattleState();
         State.EventBus = new BattleEventBus();
-        _logger = new CombatLogger(State.EventBus, State.Log);
 
         int idCounter = 0;
 

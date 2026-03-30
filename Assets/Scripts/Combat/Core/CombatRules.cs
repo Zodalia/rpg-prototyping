@@ -199,6 +199,8 @@ public sealed class CombatRules
     {
         foreach (var unit in state.Units.Where(u => u.IsAlive))
         {
+            state.EventBus.BeginGroup();
+
             var nextStatuses = new List<StatusInstance>();
 
             foreach (var status in unit.Statuses)
@@ -239,6 +241,8 @@ public sealed class CombatRules
                 unit.IsAlive = false;
                 state.EventBus.Raise(new UnitDefeatedEvent(state.TurnNumber, unit));
             }
+
+            state.EventBus.EndGroup();
         }
     }
 

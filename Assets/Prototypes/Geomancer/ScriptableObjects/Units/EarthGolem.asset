@@ -14,12 +14,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::UnitDefinition
   <Id>k__BackingField: golem
   <DisplayName>k__BackingField: Earth Golem
-  <MaxHp>k__BackingField: 5
+  <MaxHp>k__BackingField: 25
   <BaseAttack>k__BackingField: 5
   <BaseDefense>k__BackingField: 2
   <Resources>k__BackingField:
   - resource: {fileID: 11400000, guid: d943ed5ad5db6ba4883f801e78b5b7a9, type: 2}
-    initialValue: 5
+    initialValue: 3
     resetToValueOnTurnStart: 0
     turnStartValue: 1
   <Actions>k__BackingField:
