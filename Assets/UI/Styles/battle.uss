@@ -1,0 +1,275 @@
+/* ============================================================
+   Battle UI – Master Stylesheet
+   All visual styling lives here. C# only toggles USS classes.
+   ============================================================ */
+
+/* ── Custom Properties (Theme Variables) ─────────────────── */
+
+:root {
+    --color-bg-normal:       rgba(51, 51, 51, 0.8);
+    --color-bg-active:       rgba(26, 102, 26, 0.9);
+    --color-bg-targetable:   rgba(102, 77, 26, 0.9);
+    --color-bg-dead:         rgba(26, 26, 26, 0.5);
+
+    --color-hp-fill:         #4CAF50;
+    --color-hp-background:   #2a2a2a;
+
+    --color-text-primary:    #EEEEEE;
+    --color-text-secondary:  #BBBBBB;
+    --color-text-log:        #CCCCCC;
+
+    --color-button-bg:       #3a3a3a;
+    --color-button-bg-hover: #505050;
+    --color-button-bg-active:#606060;
+    --color-button-text:     #EEEEEE;
+
+    --color-cancel-bg:       #6b2222;
+    --color-cancel-bg-hover: #883333;
+
+    --spacing-sm: 4px;
+    --spacing-md: 8px;
+    --spacing-lg: 16px;
+}
+
+/* ── Root Screen Layout ──────────────────────────────────── */
+
+#battle-root {
+    flex-grow: 1;
+    flex-direction: column;
+    padding: var(--spacing-md);
+}
+
+#resource-bar {
+    flex-direction: row;
+    justify-content: center;
+    padding: var(--spacing-sm);
+    margin-bottom: var(--spacing-sm);
+    min-height: 32px;
+}
+
+#resource-bar.hidden {
+    display: none;
+}
+
+#battlefield {
+    flex-grow: 1;
+    flex-direction: row;
+    justify-content: space-around;
+    align-items: flex-start;
+}
+
+#ally-column {
+    flex-direction: column;
+    flex-grow: 1;
+    margin-right: var(--spacing-md);
+}
+
+#enemy-column {
+    flex-direction: column;
+    flex-grow: 1;
+    margin-left: var(--spacing-md);
+}
+
+#bottom-panel {
+    flex-direction: column;
+    margin-top: var(--spacing-md);
+}
+
+/* ── Action Bar ──────────────────────────────────────────── */
+
+#action-bar {
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+    padding: var(--spacing-sm);
+    min-height: 40px;
+}
+
+.action-button {
+    margin: var(--spacing-sm);
+    padding: 6px 16px;
+    background-color: var(--color-button-bg);
+    color: var(--color-button-text);
+    border-radius: 4px;
+    border-width: 1px;
+    border-color: #555;
+    -unity-font-style: bold;
+    font-size: 14px;
+}
+
+.action-button:hover {
+    background-color: var(--color-button-bg-hover);
+}
+
+.action-button:active {
+    background-color: var(--color-button-bg-active);
+}
+
+#cancel-targeting-button {
+    margin: var(--spacing-sm);
+    padding: 6px 16px;
+    background-color: var(--color-cancel-bg);
+    color: var(--color-button-text);
+    border-radius: 4px;
+    border-width: 1px;
+    border-color: #833;
+    -unity-font-style: bold;
+    font-size: 14px;
+}
+
+#cancel-targeting-button:hover {
+    background-color: var(--color-cancel-bg-hover);
+}
+
+#cancel-targeting-button.hidden {
+    display: none;
+}
+
+/* ── Combat Log ──────────────────────────────────────────── */
+
+#combat-log {
+    max-height: 180px;
+    min-height: 80px;
+    background-color: rgba(0, 0, 0, 0.4);
+    border-radius: 4px;
+    padding: var(--spacing-sm);
+    margin-top: var(--spacing-sm);
+}
+
+#combat-log-content {
+    flex-direction: column;
+}
+
+.log-entry {
+    color: var(--color-text-log);
+    font-size: 12px;
+    padding: 1px 0;
+    white-space: normal;
+}
+
+/* ── Unit Card ───────────────────────────────────────────── */
+
+.unit-card {
+    background-color: var(--color-bg-normal);
+    border-radius: 6px;
+    padding: var(--spacing-md);
+    margin-bottom: var(--spacing-sm);
+    flex-direction: column;
+}
+
+.unit-card.unit--active {
+    background-color: var(--color-bg-active);
+}
+
+.unit-card.unit--targetable {
+    background-color: var(--color-bg-targetable);
+}
+
+.unit-card.unit--dead {
+    background-color: var(--color-bg-dead);
+    opacity: 0.5;
+}
+
+/* Target overlay — invisible button covering entire card */
+.target-overlay {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0);
+    border-width: 0;
+}
+
+.target-overlay.hidden {
+    display: none;
+}
+
+.unit-name {
+    color: var(--color-text-primary);
+    font-size: 16px;
+    -unity-font-style: bold;
+    margin-bottom: var(--spacing-sm);
+}
+
+/* HP bar — uses ProgressBar */
+.hp-bar {
+    height: 18px;
+    margin-bottom: var(--spacing-sm);
+}
+
+.hp-bar .unity-progress-bar__background {
+    background-color: var(--color-hp-background);
+    border-radius: 3px;
+}
+
+.hp-bar .unity-progress-bar__progress {
+    background-color: var(--color-hp-fill);
+    border-radius: 3px;
+}
+
+.hp-bar .unity-progress-bar__title {
+    color: var(--color-text-primary);
+    font-size: 11px;
+    -unity-text-align: middle-center;
+}
+
+/* ── Status Icons ────────────────────────────────────────── */
+
+.status-container {
+    flex-direction: row;
+    flex-wrap: wrap;
+    margin-top: var(--spacing-sm);
+}
+
+.status-icon {
+    width: 28px;
+    height: 28px;
+    margin-right: var(--spacing-sm);
+    margin-bottom: var(--spacing-sm);
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.status-icon__image {
+    width: 20px;
+    height: 20px;
+    -unity-background-scale-mode: scale-to-fit;
+}
+
+.status-icon__turns {
+    color: var(--color-text-primary);
+    font-size: 9px;
+    -unity-text-align: upper-center;
+}
+
+/* ── Resource Entries ────────────────────────────────────── */
+
+.resource-container {
+    flex-direction: row;
+    flex-wrap: wrap;
+    margin-top: var(--spacing-sm);
+}
+
+.resource-container.hidden {
+    display: none;
+}
+
+.resource-entry {
+    flex-direction: row;
+    align-items: center;
+    margin-right: var(--spacing-md);
+}
+
+.resource-entry__icon {
+    width: 18px;
+    height: 18px;
+    margin-right: 2px;
+    -unity-background-scale-mode: scale-to-fit;
+}
+
+.resource-entry__value {
+    color: var(--color-text-secondary);
+    font-size: 13px;
+}

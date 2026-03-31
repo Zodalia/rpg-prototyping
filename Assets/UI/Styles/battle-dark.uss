@@ -1,0 +1,27 @@
+/* ============================================================
+   Battle UI – Dark Alternate Theme
+   Swap this USS onto the UIDocument to retheme without C# changes.
+   Only overrides the custom-property variables from battle.uss.
+   ============================================================ */
+
+:root {
+    --color-bg-normal:       rgba(20, 20, 28, 0.9);
+    --color-bg-active:       rgba(15, 60, 90, 0.95);
+    --color-bg-targetable:   rgba(90, 60, 15, 0.95);
+    --color-bg-dead:         rgba(10, 10, 10, 0.6);
+
+    --color-hp-fill:         #2196F3;
+    --color-hp-background:   #1a1a24;
+
+    --color-text-primary:    #E0E0F0;
+    --color-text-secondary:  #9090B0;
+    --color-text-log:        #A0A0C0;
+
+    --color-button-bg:       #252535;
+    --color-button-bg-hover: #353550;
+    --color-button-bg-active:#454565;
+    --color-button-text:     #D0D0E8;
+
+    --color-cancel-bg:       #5a1a3a;
+    --color-cancel-bg-hover: #7a2a5a;
+}

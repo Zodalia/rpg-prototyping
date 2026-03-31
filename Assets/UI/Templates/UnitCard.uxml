@@ -1,0 +1,9 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements">
+    <ui:VisualElement name="unit-card" class="unit-card">
+        <ui:Label name="unit-name" class="unit-name" text="Unit Name" />
+        <ui:ProgressBar name="hp-bar" class="hp-bar" title="0 / 0" low-value="0" high-value="100" />
+        <ui:VisualElement name="status-container" class="status-container" />
+        <ui:VisualElement name="resource-container" class="resource-container" />
+        <ui:Button name="target-overlay" class="target-overlay hidden" />
+    </ui:VisualElement>
+</ui:UXML>

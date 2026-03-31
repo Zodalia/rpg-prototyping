@@ -1,0 +1,6 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements">
+    <ui:VisualElement name="status-icon" class="status-icon">
+        <ui:VisualElement name="icon" class="status-icon__image" />
+        <ui:Label name="turns" class="status-icon__turns" text="0" />
+    </ui:VisualElement>
+</ui:UXML>

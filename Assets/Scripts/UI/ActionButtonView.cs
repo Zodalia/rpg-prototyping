@@ -1,3 +1,4 @@
+#if LEGACY_UGUI
 using System;
 using TMPro;
 using UnityEngine;
@@ -15,3 +16,4 @@ public sealed class ActionButtonView : MonoBehaviour
         button.onClick.AddListener(() => onClick?.Invoke());
     }
 }
+#endif

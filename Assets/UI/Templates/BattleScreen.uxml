@@ -1,0 +1,24 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements">
+    <Style src="../Styles/battle.uss" />
+
+    <ui:VisualElement name="battle-root">
+        <!-- Global / team resource bar -->
+        <ui:VisualElement name="resource-bar" class="hidden" />
+
+        <!-- Battlefield: ally and enemy columns -->
+        <ui:VisualElement name="battlefield">
+            <ui:VisualElement name="ally-column" />
+            <ui:VisualElement name="enemy-column" />
+        </ui:VisualElement>
+
+        <!-- Bottom panel: actions + log -->
+        <ui:VisualElement name="bottom-panel">
+            <ui:VisualElement name="action-bar">
+                <ui:Button name="cancel-targeting-button" class="hidden" text="Cancel" />
+            </ui:VisualElement>
+            <ui:ScrollView name="combat-log" vertical-scroller-visibility="Auto">
+                <ui:VisualElement name="combat-log-content" />
+            </ui:ScrollView>
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

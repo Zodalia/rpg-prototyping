@@ -1,38 +1,43 @@
-#if LEGACY_UGUI
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
-using UnityEngine.UI;
-using TMPro;
+using UnityEngine.UIElements;
 
-public sealed class BattleScreen : MonoBehaviour
+public sealed class BattleScreenUI : MonoBehaviour
 {
     [Header("References")]
     [SerializeField] private BattleController battleController;
+    [SerializeField] private UIDocument uiDocument;
 
-    [Header("Unit Panels")]
-    [SerializeField] private Transform playerUnitsRoot;
-    [SerializeField] private Transform enemyUnitsRoot;
-    [SerializeField] private UnitView unitViewPrefab;
+    [Header("Templates")]
+    [SerializeField] private VisualTreeAsset unitCardTemplate;
+    [SerializeField] private VisualTreeAsset actionButtonTemplate;
+    [SerializeField] private VisualTreeAsset statusIconTemplate;
+    [SerializeField] private VisualTreeAsset resourceEntryTemplate;
 
-    [Header("Actions")]
-    [SerializeField] private Transform actionButtonRoot;
-    [SerializeField] private ActionButtonView actionButtonPrefab;
-    [SerializeField] private Button cancelTargetingButton;
-
-    [Header("Log")]
-    [SerializeField] private TextMeshProUGUI logText;
-    [SerializeField] private int maxLogLines = 12;
-
-    [Header("Resources")]
-    [SerializeField] private ResourceBarView resourceBarView;
+    [Header("Options")]
+    [SerializeField] private bool showUnitResources;
 
     [Header("Event Pacing")]
     [SerializeField] private float groupDelay = 1f;
     [SerializeField] private float intraGroupDelay = 0.15f;
 
-    private readonly List<UnitView> _unitViews = new();
+    [Header("Log")]
+    [SerializeField] private int maxLogLines = 12;
+
+    // Cached elements
+    private VisualElement _root;
+    private VisualElement _allyColumn;
+    private VisualElement _enemyColumn;
+    private VisualElement _actionBar;
+    private Button _cancelButton;
+    private ScrollView _combatLog;
+    private VisualElement _combatLogContent;
+    private VisualElement _resourceBar;
+
+    // State
+    private readonly List<UnitCardController> _unitCards = new();
     private UnitState _pendingActor;
     private ActionDefinition _pendingAction;
 
@@ -46,15 +51,15 @@ public sealed class BattleScreen : MonoBehaviour
 
     private void OnEnable()
     {
+        _root = uiDocument.rootVisualElement;
+        CacheElements();
+
         battleController.StateChanged += OnStateChanged;
         battleController.PlayerInputRequested += OnPlayerInputRequested;
         battleController.BattleEnded += OnBattleEnded;
 
-        if (cancelTargetingButton != null)
-        {
-            cancelTargetingButton.onClick.AddListener(CancelTargeting);
-            cancelTargetingButton.gameObject.SetActive(false);
-        }
+        _cancelButton.clicked += CancelTargeting;
+        _cancelButton.AddToClassList("hidden");
     }
 
     private void OnDisable()
@@ -69,9 +74,21 @@ public sealed class BattleScreen : MonoBehaviour
             _subscribedBus = null;
         }
 
-        if (cancelTargetingButton != null)
-            cancelTargetingButton.onClick.RemoveListener(CancelTargeting);
+        _cancelButton.clicked -= CancelTargeting;
     }
+
+    private void CacheElements()
+    {
+        _allyColumn = _root.Q("ally-column");
+        _enemyColumn = _root.Q("enemy-column");
+        _actionBar = _root.Q("action-bar");
+        _cancelButton = _root.Q<Button>("cancel-targeting-button");
+        _combatLog = _root.Q<ScrollView>("combat-log");
+        _combatLogContent = _root.Q("combat-log-content");
+        _resourceBar = _root.Q("resource-bar");
+    }
+
+    // ─────────────────────── Event Handlers ───────────────────────
 
     private void OnStateChanged()
     {
@@ -79,8 +96,8 @@ public sealed class BattleScreen : MonoBehaviour
             return;
 
         SubscribeToEventBus();
-        SpawnUnitViewsIfNeeded();
-        RefreshUnitViews();
+        SpawnUnitCardsIfNeeded();
+        RefreshAll();
 
         if (!_isProcessingLog && _pendingGroups.Count > 0)
             _processingCoroutine = StartCoroutine(ProcessLog());
@@ -120,10 +137,12 @@ public sealed class BattleScreen : MonoBehaviour
         }
     }
 
+    // ─────────────────────── Log Processing ───────────────────────
+
     private IEnumerator ProcessLog()
     {
         _isProcessingLog = true;
-        yield return null; // let all synchronous events settle
+        yield return null;
 
         while (true)
         {
@@ -137,7 +156,7 @@ public sealed class BattleScreen : MonoBehaviour
                     if (text != null)
                     {
                         _logLines.Add(text);
-                        RefreshUnitViews();
+                        RefreshAll();
                         RefreshLog();
 
                         if (i < group.Events.Count - 1)
@@ -145,29 +164,24 @@ public sealed class BattleScreen : MonoBehaviour
                     }
                 }
 
-                // Delay between groups (skip if that was the last queued group and nothing more is coming)
                 if (_pendingGroups.Count > 0)
                     yield return new WaitForSeconds(groupDelay);
                 else
                     yield return new WaitForSeconds(groupDelay);
             }
 
-            // Player input is waiting — hand off control
             if (_deferredActor != null)
                 break;
 
-            // Battle over — nothing more to do
             if (battleController.State.IsBattleOver)
                 break;
 
-            // Advance to next turn (may produce more groups from enemy actions / status ticks)
             battleController.AdvanceTurn();
-            yield return null; // let synchronous events settle
+            yield return null;
 
             if (battleController.State.IsBattleOver)
                 break;
 
-            // No new groups — next turn is ready with nothing to show
             if (_pendingGroups.Count == 0)
                 break;
         }
@@ -205,35 +219,95 @@ public sealed class BattleScreen : MonoBehaviour
         };
     }
 
-    private void RefreshUnitViews()
+    // ─────────────────────── Refresh ──────────────────────────────
+
+    private void RefreshAll()
     {
         var activeUnit = battleController.State.ActiveUnit;
-        foreach (var view in _unitViews)
-            view.Refresh(activeUnit);
+        foreach (var card in _unitCards)
+            card.Refresh(activeUnit);
 
-        if (resourceBarView != null)
-            resourceBarView.Refresh(battleController.State);
+        RefreshResourceBar();
     }
 
     private void RefreshLog()
     {
-        var entries = _logLines.TakeLast(maxLogLines);
-        logText.text = string.Join("\n", entries);
+        _combatLogContent.Clear();
+
+        foreach (var line in _logLines.TakeLast(maxLogLines))
+        {
+            var label = new Label(line);
+            label.AddToClassList("log-entry");
+            _combatLogContent.Add(label);
+        }
+
+        _combatLog.schedule.Execute(() =>
+            _combatLog.scrollOffset = new Vector2(0, float.MaxValue));
     }
 
-    private void SpawnUnitViewsIfNeeded()
+    private void RefreshResourceBar()
     {
-        if (_unitViews.Count > 0)
+        _resourceBar.Clear();
+
+        var state = battleController.State;
+        if (state == null) return;
+
+        foreach (var kvp in state.GlobalResources.Where(
+            kvp => kvp.Value.Definition != null && kvp.Value.Definition.PlayerFacing))
+        {
+            SpawnResourceEntry(_resourceBar, kvp.Value);
+        }
+
+        foreach (var teamKvp in state.TeamResources.Where(
+            kvp => kvp.Value.Values.Any(
+                res => res.Definition != null && res.Definition.PlayerFacing)))
+        {
+            foreach (var resKvp in teamKvp.Value)
+                SpawnResourceEntry(_resourceBar, resKvp.Value);
+        }
+
+        if (_resourceBar.childCount > 0)
+            _resourceBar.RemoveFromClassList("hidden");
+        else
+            _resourceBar.AddToClassList("hidden");
+    }
+
+    private void SpawnResourceEntry(VisualElement parent, ResourceInstance resource)
+    {
+        var el = resourceEntryTemplate.CloneTree();
+        var icon = el.Q("icon");
+        if (resource.Definition != null && resource.Definition.Icon != null)
+        {
+            icon.style.backgroundImage = new StyleBackground(resource.Definition.Icon);
+            icon.style.unityBackgroundImageTintColor = (Color)resource.Definition.IconColor;
+        }
+        el.Q<Label>("value").text = resource.CurrentValue.ToString();
+        parent.Add(el);
+    }
+
+    // ─────────────────────── Unit Cards ───────────────────────────
+
+    private void SpawnUnitCardsIfNeeded()
+    {
+        if (_unitCards.Count > 0)
             return;
 
         foreach (var unit in battleController.State.Units)
         {
-            var root = unit.Team == "Player" ? playerUnitsRoot : enemyUnitsRoot;
-            var view = Instantiate(unitViewPrefab, root);
-            view.Bind(unit);
-            _unitViews.Add(view);
+            var parent = unit.Team == "Player" ? _allyColumn : _enemyColumn;
+            var tree = unitCardTemplate.CloneTree();
+            var cardRoot = tree.Q(className: "unit-card");
+
+            var controller = new UnitCardController(
+                cardRoot, statusIconTemplate, resourceEntryTemplate, showUnitResources);
+            controller.Bind(unit);
+
+            parent.Add(tree);
+            _unitCards.Add(controller);
         }
     }
+
+    // ─────────────────────── Actions ──────────────────────────────
 
     private void ShowPlayerActions(UnitState actor, List<ActionDefinition> actions)
     {
@@ -246,14 +320,18 @@ public sealed class BattleScreen : MonoBehaviour
     {
         ClearActionButtons();
         ClearTargeting();
-
-        if (cancelTargetingButton != null)
-            cancelTargetingButton.gameObject.SetActive(false);
+        _cancelButton.AddToClassList("hidden");
 
         foreach (var action in actions)
         {
-            var button = Instantiate(actionButtonPrefab, actionButtonRoot);
-            button.Bind(action, () => OnActionChosen(action));
+            var tree = actionButtonTemplate.CloneTree();
+            var button = tree.Q<Button>("action-button");
+            button.Q<Label>("label").text = action.DisplayName;
+
+            var captured = action;
+            button.clicked += () => OnActionChosen(captured);
+
+            _actionBar.Add(tree);
         }
     }
 
@@ -285,21 +363,20 @@ public sealed class BattleScreen : MonoBehaviour
         }
     }
 
+    // ─────────────────────── Targeting ─────────────────────────────
+
     private void EnterTargetingMode(ActionDefinition action, IEnumerable<UnitState> candidates)
     {
         _pendingAction = action;
-
         ClearActionButtons();
-
-        if (cancelTargetingButton != null)
-            cancelTargetingButton.gameObject.SetActive(true);
+        _cancelButton.RemoveFromClassList("hidden");
 
         var candidateSet = new HashSet<string>(candidates.Select(c => c.UnitId));
 
-        foreach (var view in _unitViews)
+        foreach (var card in _unitCards)
         {
-            if (view.Unit.IsAlive && candidateSet.Contains(view.Unit.UnitId))
-                view.SetTargetable(true, OnTargetChosen);
+            if (card.Unit.IsAlive && candidateSet.Contains(card.Unit.UnitId))
+                card.SetTargetable(true, OnTargetChosen);
         }
     }
 
@@ -321,13 +398,6 @@ public sealed class BattleScreen : MonoBehaviour
         _pendingAction = null;
         ClearTargeting();
 
-        var actions = battleController.State != null
-            ? _pendingActor.Definition.Actions
-                .Where(a => battleController.State.ActiveUnit == _pendingActor)
-                .ToList()
-            : new List<ActionDefinition>();
-
-        // Re-request available actions through the controller event
         if (battleController.State != null)
         {
             var rules = new CombatRules();
@@ -339,30 +409,37 @@ public sealed class BattleScreen : MonoBehaviour
     {
         ClearActionButtons();
         ClearTargeting();
-
-        if (cancelTargetingButton != null)
-            cancelTargetingButton.gameObject.SetActive(false);
+        _cancelButton.AddToClassList("hidden");
 
         battleController.SubmitAction(new ActionExecution(_pendingActor, action, targets));
     }
 
     private void ClearActionButtons()
     {
-        foreach (Transform child in actionButtonRoot)
-            Destroy(child.gameObject);
+        // Remove all action buttons but keep the cancel button
+        var toRemove = new List<VisualElement>();
+        foreach (var child in _actionBar.Children())
+        {
+            if (child != _cancelButton)
+                toRemove.Add(child);
+        }
+        foreach (var el in toRemove)
+            _actionBar.Remove(el);
     }
 
     private void ClearTargeting()
     {
-        foreach (var view in _unitViews)
-            view.SetTargetable(false);
+        foreach (var card in _unitCards)
+            card.SetTargetable(false);
     }
 
     private void OnBattleEnded(string winner)
     {
         ClearActionButtons();
         ClearTargeting();
-        logText.text += $"\n\n{winner} wins.";
+
+        var endLabel = new Label($"\n{winner} wins.");
+        endLabel.AddToClassList("log-entry");
+        _combatLogContent.Add(endLabel);
     }
 }
-#endif

@@ -12,10 +12,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 98b79c0979743e04f97fb60ea773974f, type: 3}
   m_Name: Geomancer
   m_EditorClassIdentifier: Assembly-CSharp::UnitDefinition
-  <Id>k__BackingField: 
-  <DisplayName>k__BackingField: 
-  <MaxHp>k__BackingField: 20
+  <Id>k__BackingField: geomancer
+  <DisplayName>k__BackingField: Geomancer
+  <MaxHp>k__BackingField: 40
   <BaseAttack>k__BackingField: 5
   <BaseDefense>k__BackingField: 2
   <Resources>k__BackingField: []
-  <Actions>k__BackingField: []
+  <Actions>k__BackingField:
+  - {fileID: 11400000, guid: cb486218b6e668c4a8813f4bdf75d2d3, type: 2}
+  - {fileID: 11400000, guid: 14da1224c47b516459f4ddcb84299c20, type: 2}
+  - {fileID: 11400000, guid: ef901d81dd941d1408933df2994b152f, type: 2}

@@ -1,3 +1,4 @@
+#if LEGACY_UGUI
 using System;
 using System.Linq;
 using TMPro;
@@ -134,3 +135,4 @@ public sealed class UnitView : MonoBehaviour
             backgroundImage.color = targetableColor;
     }
 }
+#endif

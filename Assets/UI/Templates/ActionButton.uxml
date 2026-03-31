@@ -1,0 +1,5 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements">
+    <ui:Button name="action-button" class="action-button">
+        <ui:Label name="label" text="Action" />
+    </ui:Button>
+</ui:UXML>

@@ -1,0 +1,6 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements">
+    <ui:VisualElement name="resource-entry" class="resource-entry">
+        <ui:VisualElement name="icon" class="resource-entry__icon" />
+        <ui:Label name="value" class="resource-entry__value" text="0" />
+    </ui:VisualElement>
+</ui:UXML>
