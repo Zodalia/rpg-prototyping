@@ -1,0 +1,5 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements">
+    <ui:VisualElement class="turn-entry">
+        <ui:Label name="turn-entry-name" class="turn-entry__name" text="Unit" />
+    </ui:VisualElement>
+</ui:UXML>

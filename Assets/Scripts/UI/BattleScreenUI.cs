@@ -19,6 +19,10 @@ public sealed class BattleScreenUI : MonoBehaviour
     [Header("Options")]
     [SerializeField] private bool showUnitResources;
 
+    [Header("Turn Tracker")]
+    [SerializeField] private VisualTreeAsset turnTrackerEntryTemplate;
+    [SerializeField] private int turnPreviewCount = 8;
+
     [Header("Event Pacing")]
     [SerializeField] private float groupDelay = 1f;
     [SerializeField] private float intraGroupDelay = 0.15f;
@@ -35,6 +39,7 @@ public sealed class BattleScreenUI : MonoBehaviour
     private ScrollView _combatLog;
     private VisualElement _combatLogContent;
     private VisualElement _resourceBar;
+    private VisualElement _turnTracker;
 
     // State
     private readonly List<UnitCardController> _unitCards = new();
@@ -48,6 +53,7 @@ public sealed class BattleScreenUI : MonoBehaviour
     private UnitState _deferredActor;
     private List<ActionDefinition> _deferredActions;
     private BattleEventBus _subscribedBus;
+    private List<UnitState> _baselineTurnPreview = new();
 
     private void OnEnable()
     {
@@ -86,6 +92,7 @@ public sealed class BattleScreenUI : MonoBehaviour
         _combatLog = _root.Q<ScrollView>("combat-log");
         _combatLogContent = _root.Q("combat-log-content");
         _resourceBar = _root.Q("resource-bar");
+        _turnTracker = _root.Q("turn-tracker");
     }
 
     // ─────────────────────── Event Handlers ───────────────────────
@@ -228,6 +235,9 @@ public sealed class BattleScreenUI : MonoBehaviour
             card.Refresh(activeUnit);
 
         RefreshResourceBar();
+
+        _baselineTurnPreview = ComputeTurnPreview(null);
+        RefreshTurnTracker(null);
     }
 
     private void RefreshLog()
@@ -285,6 +295,56 @@ public sealed class BattleScreenUI : MonoBehaviour
         parent.Add(el);
     }
 
+    // ─────────────────────── Turn Tracker ─────────────────────────
+
+    private List<UnitState> ComputeTurnPreview(ActionDefinition hoverAction)
+    {
+        var state = battleController.State;
+        if (state == null) return new List<UnitState>();
+
+        var strategy = battleController.TurnOrderStrategy;
+        if (strategy != null)
+        {
+            return strategy.GetTurnPreview(
+                state, battleController.EnemyAi, turnPreviewCount,
+                hoverAction, _pendingActor);
+        }
+
+        return new CombatRules().GetTurnPreview(state, turnPreviewCount);
+    }
+
+    private void RefreshTurnTracker(ActionDefinition hoverAction)
+    {
+        _turnTracker.Clear();
+
+        var preview = hoverAction != null
+            ? ComputeTurnPreview(hoverAction)
+            : _baselineTurnPreview;
+
+        for (int i = 0; i < preview.Count; i++)
+        {
+            var unit = preview[i];
+            var el = turnTrackerEntryTemplate.CloneTree();
+            var entry = el.Q(className: "turn-entry");
+
+            el.Q<Label>("turn-entry-name").text = unit.Definition.DisplayName;
+
+            if (i == 0)
+                entry.AddToClassList("turn-entry--current");
+
+            entry.AddToClassList(unit.Team == "Player"
+                ? "turn-entry--player"
+                : "turn-entry--enemy");
+
+            bool isSpeculative = hoverAction != null &&
+                (i >= _baselineTurnPreview.Count || _baselineTurnPreview[i] != unit);
+            if (isSpeculative)
+                entry.AddToClassList("turn-entry--speculative");
+
+            _turnTracker.Add(el);
+        }
+    }
+
     // ─────────────────────── Unit Cards ───────────────────────────
 
     private void SpawnUnitCardsIfNeeded()
@@ -330,6 +390,8 @@ public sealed class BattleScreenUI : MonoBehaviour
 
             var captured = action;
             button.clicked += () => OnActionChosen(captured);
+            button.RegisterCallback<MouseEnterEvent>(_ => RefreshTurnTracker(captured));
+            button.RegisterCallback<MouseLeaveEvent>(_ => RefreshTurnTracker(null));
 
             _actionBar.Add(tree);
         }

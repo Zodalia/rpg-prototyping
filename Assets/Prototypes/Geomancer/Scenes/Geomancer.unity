@@ -462,7 +462,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BattleController
   playerUnits:
-  - {fileID: 11400000, guid: a236d9e951052a14f8a1ca0c2286b9ec, type: 2}
+  - {fileID: 11400000, guid: 9a4af6d8714b3714095857f431c7591d, type: 2}
   enemyUnits:
   - {fileID: 11400000, guid: a236d9e951052a14f8a1ca0c2286b9ec, type: 2}
   - {fileID: 11400000, guid: c05585b5537f86c43b89fcc0346c0bb5, type: 2}
@@ -598,6 +598,8 @@ MonoBehaviour:
   statusIconTemplate: {fileID: 9197481963319205126, guid: 23dc517587073a043a01a8f7b22d412c, type: 3}
   resourceEntryTemplate: {fileID: 9197481963319205126, guid: 306416ca0fed1eb43a3f390388f98980, type: 3}
   showUnitResources: 0
+  turnTrackerEntryTemplate: {fileID: 9197481963319205126, guid: 1ba4185395011ce4ab42c6d41ffa376f, type: 3}
+  turnPreviewCount: 8
   groupDelay: 1
   intraGroupDelay: 0.15
   maxLogLines: 12

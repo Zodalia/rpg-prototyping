@@ -5,9 +5,12 @@
         <!-- Global / team resource bar — always visible at top -->
         <ui:VisualElement name="resource-bar" class="hidden" />
 
-        <!-- Enemies — horizontally listed in the center -->
-        <ui:VisualElement name="battlefield">
-            <ui:VisualElement name="enemy-column" />
+        <!-- Mid section: turn tracker (left) + battlefield (center) -->
+        <ui:VisualElement name="mid-section">
+            <ui:VisualElement name="turn-tracker" />
+            <ui:VisualElement name="battlefield">
+                <ui:VisualElement name="enemy-column" />
+            </ui:VisualElement>
         </ui:VisualElement>
 
         <!-- Bottom panel: actions (left) | log (center) | player units (right) -->

@@ -13,6 +13,8 @@ public sealed class BattleController : MonoBehaviour
     [SerializeField] private TurnOrderStrategy turnOrderStrategy;
 
     public BattleState State { get; private set; }
+    public TurnOrderStrategy TurnOrderStrategy => turnOrderStrategy;
+    public EnemyAi EnemyAi => _enemyAi;
 
     public event Action StateChanged;
     public event Action<UnitState, List<ActionDefinition>> PlayerInputRequested;

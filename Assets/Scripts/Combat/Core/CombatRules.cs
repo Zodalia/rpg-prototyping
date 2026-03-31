@@ -4,6 +4,8 @@ using UnityEngine;
 
 public sealed class CombatRules
 {
+    public ResourceSnapshot ActiveSnapshot { get; set; }
+
     public UnitState GetNextActiveUnit(BattleState state)
     {
         // Round-robin fallback when no TurnOrderStrategy is assigned.
@@ -87,6 +89,9 @@ public sealed class CombatRules
 
     public int GetResourceAmount(BattleState state, UnitState unit, string resourceId)
     {
+        if (ActiveSnapshot != null)
+            return ActiveSnapshot.GetResource(state, unit, resourceId);
+
         // Check unit resources first
         if (unit.Resources.TryGetValue(resourceId, out var unitResource))
             return unitResource.CurrentValue;
@@ -325,5 +330,21 @@ public sealed class CombatRules
             if (unit.Cooldowns[key] <= 0)
                 unit.Cooldowns.Remove(key);
         }
+    }
+
+    public List<UnitState> GetTurnPreview(BattleState state, int count)
+    {
+        var living = state.LivingUnits.ToList();
+        if (living.Count == 0 || count == 0)
+            return new List<UnitState>();
+
+        var result = new List<UnitState>(count);
+        int startIndex = state.ActiveUnit != null ? living.IndexOf(state.ActiveUnit) : 0;
+        if (startIndex < 0) startIndex = 0;
+
+        for (int i = 0; i < count; i++)
+            result.Add(living[(startIndex + i) % living.Count]);
+
+        return result;
     }
 }

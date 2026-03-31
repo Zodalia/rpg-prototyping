@@ -7,6 +7,9 @@ public sealed class GainResourceEffectConfig : EffectConfig
     [SerializeField] private ResourceDefinition resource;
     [SerializeField] private int amount;
 
+    public ResourceDefinition Resource => resource;
+    public int Amount => amount;
+
     public override string DisplayName => "Gain Resource";
 
     public override void Apply(BattleState state, ActionExecution execution, CombatRules rules)

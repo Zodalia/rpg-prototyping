@@ -7,6 +7,9 @@ public sealed class SpendResourceEffectConfig : EffectConfig
     [SerializeField] private ResourceDefinition resource;
     [SerializeField] private int amount;
 
+    public ResourceDefinition Resource => resource;
+    public int Amount => amount;
+
     public override string DisplayName => "Spend Resource";
 
     public override void Apply(BattleState state, ActionExecution execution, CombatRules rules)
