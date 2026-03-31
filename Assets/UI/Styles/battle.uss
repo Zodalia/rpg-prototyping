@@ -47,41 +47,43 @@
     min-height: 32px;
 }
 
-#resource-bar.hidden {
-    display: none;
-}
-
 #battlefield {
     flex-grow: 1;
     flex-direction: row;
-    justify-content: space-around;
+    justify-content: center;
+    align-items: center;
+}
+
+#enemy-column {
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
     align-items: flex-start;
+}
+
+#enemy-column > * {
+    margin: var(--spacing-sm);
+}
+
+#bottom-panel {
+    flex-direction: row;
+    margin-top: var(--spacing-md);
+    align-items: flex-end;
 }
 
 #ally-column {
     flex-direction: column;
-    flex-grow: 1;
-    margin-right: var(--spacing-md);
-}
-
-#enemy-column {
-    flex-direction: column;
-    flex-grow: 1;
+    min-width: 180px;
     margin-left: var(--spacing-md);
-}
-
-#bottom-panel {
-    flex-direction: column;
-    margin-top: var(--spacing-md);
 }
 
 /* ── Action Bar ──────────────────────────────────────────── */
 
 #action-bar {
-    flex-direction: row;
-    flex-wrap: wrap;
-    justify-content: center;
+    flex-direction: column;
+    align-items: flex-start;
     padding: var(--spacing-sm);
+    min-width: 160px;
     min-height: 40px;
 }
 
@@ -128,12 +130,14 @@
 /* ── Combat Log ──────────────────────────────────────────── */
 
 #combat-log {
+    flex-grow: 1;
     max-height: 180px;
     min-height: 80px;
     background-color: rgba(0, 0, 0, 0.4);
     border-radius: 4px;
     padding: var(--spacing-sm);
-    margin-top: var(--spacing-sm);
+    margin-left: var(--spacing-md);
+    margin-right: var(--spacing-md);
 }
 
 #combat-log-content {

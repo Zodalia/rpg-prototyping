@@ -2,16 +2,15 @@
     <Style src="../Styles/battle.uss" />
 
     <ui:VisualElement name="battle-root">
-        <!-- Global / team resource bar -->
+        <!-- Global / team resource bar — always visible at top -->
         <ui:VisualElement name="resource-bar" class="hidden" />
 
-        <!-- Battlefield: ally and enemy columns -->
+        <!-- Enemies — horizontally listed in the center -->
         <ui:VisualElement name="battlefield">
-            <ui:VisualElement name="ally-column" />
             <ui:VisualElement name="enemy-column" />
         </ui:VisualElement>
 
-        <!-- Bottom panel: actions + log -->
+        <!-- Bottom panel: actions (left) | log (center) | player units (right) -->
         <ui:VisualElement name="bottom-panel">
             <ui:VisualElement name="action-bar">
                 <ui:Button name="cancel-targeting-button" class="hidden" text="Cancel" />
@@ -19,6 +18,7 @@
             <ui:ScrollView name="combat-log" vertical-scroller-visibility="Auto">
                 <ui:VisualElement name="combat-log-content" />
             </ui:ScrollView>
+            <ui:VisualElement name="ally-column" />
         </ui:VisualElement>
     </ui:VisualElement>
 </ui:UXML>
