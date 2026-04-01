@@ -19,9 +19,10 @@ MonoBehaviour:
   <BaseDefense>k__BackingField: 2
   <Resources>k__BackingField:
   - resource: {fileID: 11400000, guid: d943ed5ad5db6ba4883f801e78b5b7a9, type: 2}
-    initialValue: 3
+    initialValue: 2
     resetToValueOnTurnStart: 0
     turnStartValue: 1
   <Actions>k__BackingField:
   - {fileID: 11400000, guid: ef901d81dd941d1408933df2994b152f, type: 2}
   - {fileID: 11400000, guid: c2651d4f687adf44ea13ed09aedec7aa, type: 2}
+  <TurnEffects>k__BackingField: []

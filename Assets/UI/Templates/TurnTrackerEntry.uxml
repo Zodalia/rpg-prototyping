@@ -1,5 +1,6 @@
-<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements">
-    <ui:VisualElement class="turn-entry">
-        <ui:Label name="turn-entry-name" class="turn-entry__name" text="Unit" />
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" editor-extension-mode="False">
+    <ui:VisualElement class="turn-entry" style="flex-direction: row;">
+        <ui:Label name="turn-entry-name" text="Unit" class="turn-entry__name"/>
+        <ui:Label name="turn-entry-delay" text="0" class="turn-entry__delay" style="right: 0; position: absolute;"/>
     </ui:VisualElement>
 </ui:UXML>

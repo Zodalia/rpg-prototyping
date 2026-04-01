@@ -14,7 +14,7 @@ public sealed class ApplyStatusEffectConfig : EffectConfig
         if (status == null)
             return;
 
-        foreach (var target in execution.Targets)
+        foreach (var target in ResolveTargets(state, execution))
         {
             var appliedDuration = duration > 0 ? duration : status.DefaultDuration;
             target.Statuses.Add(new StatusInstance(status, appliedDuration, status.TickTiming, status.TrackingScope, target.Team));

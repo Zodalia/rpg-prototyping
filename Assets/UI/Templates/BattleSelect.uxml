@@ -1,0 +1,11 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements">
+    <Style src="../Styles/battle.uss" />
+
+    <ui:VisualElement name="battle-select-root" class="battle-select-root">
+        <ui:Label name="battle-select-title" text="Select Battle" class="battle-select-title" />
+        <ui:ScrollView name="battle-list" class="battle-list" vertical-scroller-visibility="Auto">
+            <ui:VisualElement name="battle-list-content" />
+        </ui:ScrollView>
+        <ui:Button name="random-battle-button" text="Random Battle" class="battle-select-button" />
+    </ui:VisualElement>
+</ui:UXML>

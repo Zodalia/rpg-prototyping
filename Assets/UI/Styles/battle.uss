@@ -97,6 +97,12 @@
     -unity-font-style: bold;
 }
 
+.turn-entry__delay {
+    color: var(--color-text-secondary);
+    font-size: 10px;
+    margin-top: 2px;
+}
+
 #enemy-column {
     flex-direction: row;
     flex-wrap: wrap;
@@ -319,4 +325,43 @@
 .resource-entry__value {
     color: var(--color-text-secondary);
     font-size: 13px;
+}
+
+/* ─── Battle Select Screen ─── */
+
+.battle-select-root {
+    flex-grow: 1;
+    align-items: center;
+    justify-content: center;
+    padding: 40px;
+}
+
+.battle-select-title {
+    font-size: 28px;
+    color: var(--color-text-primary);
+    -unity-font-style: bold;
+    margin-bottom: 24px;
+}
+
+.battle-list {
+    flex-grow: 1;
+    width: 360px;
+    max-height: 400px;
+    margin-bottom: 16px;
+}
+
+.battle-select-button {
+    margin: var(--spacing-sm);
+    padding: 6px 16px;
+    background-color: var(--color-button-bg);
+    color: var(--color-button-text);
+    border-radius: 4px;
+    border-width: 1px;
+    border-color: #555;
+    -unity-font-style: bold;
+    font-size: 14px;
+}
+
+.battle-select-button:hover {
+    background-color: var(--color-highlight);
 }

@@ -18,3 +18,11 @@ public enum ResourceOwnershipScope
     Team,
     Global
 }
+
+public enum TurnEffectTargetScope
+{
+    Self,
+    AlliesOfOwner,
+    EnemiesOfOwner,
+    AllUnits
+}

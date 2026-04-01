@@ -5,16 +5,12 @@ using UnityEngine;
 
 public sealed class BattleController : MonoBehaviour
 {
-    [Header("Setup")]
-    [SerializeField] private List<UnitDefinition> playerUnits = new();
-    [SerializeField] private List<UnitDefinition> enemyUnits = new();
-
-    [Header("Turn Order")]
-    [SerializeField] private TurnOrderStrategy turnOrderStrategy;
-
     public BattleState State { get; private set; }
-    public TurnOrderStrategy TurnOrderStrategy => turnOrderStrategy;
+    public TurnOrderStrategy TurnOrderStrategy { get; private set; }
     public EnemyAi EnemyAi => _enemyAi;
+    public List<TurnEffectDefinition> GlobalTurnEffects { get; private set; } = new();
+    public BattleDefinition CurrentBattle { get; private set; }
+    public PlayerPartyDefinition CurrentParty { get; private set; }
 
     public event Action StateChanged;
     public event Action<UnitState, List<ActionDefinition>> PlayerInputRequested;
@@ -31,26 +27,33 @@ public sealed class BattleController : MonoBehaviour
         _enemyAi = new EnemyAi();
     }
 
-    private void Start()
+    public void StartBattle(BattleDefinition battle, PlayerPartyDefinition party)
     {
-        StartBattle();
-    }
+        CurrentBattle = battle;
+        CurrentParty = party;
 
-    public void StartBattle()
-    {
         State = new BattleState();
         State.EventBus = new BattleEventBus();
 
+        TurnOrderStrategy = battle.TurnOrderStrategy;
+        GlobalTurnEffects = battle.GlobalTurnEffects ?? new List<TurnEffectDefinition>();
+
+        foreach (var entry in battle.StartingGlobalResources)
+        {
+            if (entry.Resource != null)
+                _rules.InitializeGlobalResource(State, entry.Resource, entry.InitialValue);
+        }
+
         int idCounter = 0;
 
-        foreach (var def in playerUnits)
+        foreach (var def in party.Units)
         {
             var unit = new UnitState($"P{idCounter++}", "Player", def);
             State.Units.Add(unit);
             _rules.InitializeResources(State, unit);
         }
 
-        foreach (var def in enemyUnits)
+        foreach (var def in battle.Enemies)
         {
             var unit = new UnitState($"E{idCounter++}", "Enemy", def);
             State.Units.Add(unit);
@@ -66,12 +69,12 @@ public sealed class BattleController : MonoBehaviour
         if (CheckBattleEnd())
             return;
 
-        State.ActiveUnit = turnOrderStrategy != null
-            ? turnOrderStrategy.SelectNext(State, _rules)
+        State.ActiveUnit = TurnOrderStrategy != null
+            ? TurnOrderStrategy.SelectNext(State, _rules)
             : _rules.GetNextActiveUnit(State);
 
         State.EventBus.Raise(new TurnStartedEvent(State.TurnNumber, State.ActiveUnit));
-        _rules.OnTurnStart(State, State.ActiveUnit);
+        _rules.OnTurnStart(State, State.ActiveUnit, GlobalTurnEffects);
 
         StateChanged?.Invoke();
 
@@ -90,7 +93,7 @@ public sealed class BattleController : MonoBehaviour
     public void SubmitAction(ActionExecution execution)
     {
         _executor.Execute(State, execution, _rules);
-        _rules.OnTurnEnd(State, execution.Actor);
+        _rules.OnTurnEnd(State, execution.Actor, GlobalTurnEffects);
 
         State.EventBus.Raise(new TurnEndedEvent(State.TurnNumber, execution.Actor));
         State.UnitsActedThisRound.Add(execution.Actor.UnitId);

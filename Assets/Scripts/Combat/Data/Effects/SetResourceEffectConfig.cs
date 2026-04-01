@@ -17,7 +17,7 @@ public sealed class SetResourceEffectConfig : EffectConfig
         if (resource == null)
             return;
 
-        foreach (var target in execution.Targets)
+        foreach (var target in ResolveTargets(state, execution))
         {
             rules.SetResource(state, target, resource, value);
         }

@@ -8,6 +8,8 @@ public sealed class ResourceRankTurnOrder : TurnOrderStrategy
     [field: SerializeField] public ResourceDefinition OrderingResource { get; private set; }
     [field: SerializeField] public bool Descending { get; private set; } = true;
 
+    public override ResourceDefinition DisplayResource => OrderingResource;
+
     protected override UnitState SelectFromCandidates(
         List<UnitState> candidates, BattleState state, CombatRules rules)
     {

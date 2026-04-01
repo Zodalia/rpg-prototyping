@@ -17,7 +17,7 @@ public sealed class SpendResourceEffectConfig : EffectConfig
         if (resource == null)
             return;
 
-        foreach (var target in execution.Targets)
+        foreach (var target in ResolveTargets(state, execution))
         {
             rules.SpendResource(state, target, resource.Id, amount);
         }

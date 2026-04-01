@@ -125,3 +125,20 @@ public sealed class BattleEndedEvent : BattleEvent
         WinnerTeam = winnerTeam;
     }
 }
+
+public sealed class ResourceChangedEvent : BattleEvent
+{
+    public UnitState Unit { get; }
+    public ResourceDefinition Resource { get; }
+    public int OldValue { get; }
+    public int NewValue { get; }
+
+    public ResourceChangedEvent(int turnNumber, UnitState unit, ResourceDefinition resource, int oldValue, int newValue)
+        : base(turnNumber)
+    {
+        Unit = unit;
+        Resource = resource;
+        OldValue = oldValue;
+        NewValue = newValue;
+    }
+}

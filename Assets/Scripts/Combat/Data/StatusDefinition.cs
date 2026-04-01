@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 [CreateAssetMenu(menuName = "Combat/Status Definition")]
@@ -16,4 +17,6 @@ public sealed class StatusDefinition : ScriptableObject
 
     [field: SerializeField] public TurnTickTiming TickTiming { get; private set; } = TurnTickTiming.TurnEnd;
     [field: SerializeField] public TeamTrackingScope TrackingScope { get; private set; } = TeamTrackingScope.Self;
+
+    [field: SerializeField] public List<TurnEffectDefinition> TurnEffects { get; private set; } = new();
 }

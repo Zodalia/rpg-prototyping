@@ -33,4 +33,4 @@ MonoBehaviour:
       type: {class: GainResourceEffectConfig, ns: , asm: Assembly-CSharp}
       data:
         resource: {fileID: 11400000, guid: d943ed5ad5db6ba4883f801e78b5b7a9, type: 2}
-        amount: 1
+        amount: 3

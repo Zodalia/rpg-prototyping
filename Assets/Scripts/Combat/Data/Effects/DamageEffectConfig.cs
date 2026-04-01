@@ -10,7 +10,7 @@ public sealed class DamageEffectConfig : EffectConfig
 
     public override void Apply(BattleState state, ActionExecution execution, CombatRules rules)
     {
-        foreach (var target in execution.Targets)
+        foreach (var target in ResolveTargets(state, execution))
         {
             int damage = rules.CalculateDamage(execution.Actor, target, power + execution.PowerModifier);
             target.Hp -= damage;

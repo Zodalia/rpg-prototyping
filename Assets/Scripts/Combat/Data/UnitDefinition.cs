@@ -14,4 +14,5 @@ public sealed class UnitDefinition : ScriptableObject
 
     [field: SerializeField] public List<UnitResourceDefinition> Resources { get; private set; } = new();
     [field: SerializeField] public List<ActionDefinition> Actions { get; private set; } = new();
+    [field: SerializeField] public List<TurnEffectDefinition> TurnEffects { get; private set; } = new();
 }

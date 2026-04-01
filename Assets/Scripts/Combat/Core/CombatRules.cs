@@ -67,7 +67,7 @@ public sealed class CombatRules
         }
     }
 
-    public void OnTurnStart(BattleState state, UnitState unit)
+    public void OnTurnStart(BattleState state, UnitState unit, List<TurnEffectDefinition> globalTurnEffects)
     {
         foreach (var resourceDefinition in unit.Definition.Resources)
         {
@@ -78,11 +78,13 @@ public sealed class CombatRules
         }
 
         TickStatuses(state, unit, TurnTickTiming.TurnStart);
+        ExecuteAllTurnEffects(state, unit, TurnTickTiming.TurnStart, globalTurnEffects);
     }
 
-    public void OnTurnEnd(BattleState state, UnitState unit)
+    public void OnTurnEnd(BattleState state, UnitState unit, List<TurnEffectDefinition> globalTurnEffects)
     {
         TickStatuses(state, unit, TurnTickTiming.TurnEnd);
+        ExecuteAllTurnEffects(state, unit, TurnTickTiming.TurnEnd, globalTurnEffects);
         TickResources(state);
         ReduceCooldowns(unit);
     }
@@ -119,7 +121,9 @@ public sealed class CombatRules
                     unitRes = new ResourceInstance(resource, resource.DefaultValue);
                     unit.Resources[resourceId] = unitRes;
                 }
+                int oldUnit = unitRes.CurrentValue;
                 unitRes.CurrentValue += amount;
+                state.EventBus?.Raise(new ResourceChangedEvent(state.TurnNumber, unit, resource, oldUnit, unitRes.CurrentValue));
                 break;
             case ResourceOwnershipScope.Team:
                 if (!state.TeamResources.TryGetValue(unit.Team, out var teamResDict))
@@ -132,7 +136,9 @@ public sealed class CombatRules
                     teamRes = new ResourceInstance(resource, resource.DefaultValue);
                     teamResDict[resourceId] = teamRes;
                 }
+                int oldTeam = teamRes.CurrentValue;
                 teamRes.CurrentValue += amount;
+                state.EventBus?.Raise(new ResourceChangedEvent(state.TurnNumber, unit, resource, oldTeam, teamRes.CurrentValue));
                 break;
             case ResourceOwnershipScope.Global:
                 if (!state.GlobalResources.TryGetValue(resourceId, out var globalRes))
@@ -140,7 +146,9 @@ public sealed class CombatRules
                     globalRes = new ResourceInstance(resource, resource.DefaultValue);
                     state.GlobalResources[resourceId] = globalRes;
                 }
+                int oldGlobal = globalRes.CurrentValue;
                 globalRes.CurrentValue += amount;
+                state.EventBus?.Raise(new ResourceChangedEvent(state.TurnNumber, unit, resource, oldGlobal, globalRes.CurrentValue));
                 break;
         }
     }
@@ -150,16 +158,22 @@ public sealed class CombatRules
         // Find the resource and spend
         if (unit.Resources.TryGetValue(resourceId, out var unitRes))
         {
+            int old = unitRes.CurrentValue;
             unitRes.CurrentValue = Mathf.Max(0, unitRes.CurrentValue - amount);
+            state.EventBus?.Raise(new ResourceChangedEvent(state.TurnNumber, unit, unitRes.Definition, old, unitRes.CurrentValue));
         }
         else if (state.TeamResources.TryGetValue(unit.Team, out var teamResDict) &&
                  teamResDict.TryGetValue(resourceId, out var teamRes))
         {
+            int old = teamRes.CurrentValue;
             teamRes.CurrentValue = Mathf.Max(0, teamRes.CurrentValue - amount);
+            state.EventBus?.Raise(new ResourceChangedEvent(state.TurnNumber, unit, teamRes.Definition, old, teamRes.CurrentValue));
         }
         else if (state.GlobalResources.TryGetValue(resourceId, out var globalRes))
         {
+            int old = globalRes.CurrentValue;
             globalRes.CurrentValue = Mathf.Max(0, globalRes.CurrentValue - amount);
+            state.EventBus?.Raise(new ResourceChangedEvent(state.TurnNumber, unit, globalRes.Definition, old, globalRes.CurrentValue));
         }
     }
 
@@ -174,7 +188,9 @@ public sealed class CombatRules
                     unitRes = new ResourceInstance(resource, resource.DefaultValue);
                     unit.Resources[resourceId] = unitRes;
                 }
+                int oldUnit = unitRes.CurrentValue;
                 unitRes.CurrentValue = value;
+                state.EventBus?.Raise(new ResourceChangedEvent(state.TurnNumber, unit, resource, oldUnit, unitRes.CurrentValue));
                 break;
             case ResourceOwnershipScope.Team:
                 if (!state.TeamResources.TryGetValue(unit.Team, out var teamResDict))
@@ -187,7 +203,9 @@ public sealed class CombatRules
                     teamRes = new ResourceInstance(resource, resource.DefaultValue);
                     teamResDict[resourceId] = teamRes;
                 }
+                int oldTeam = teamRes.CurrentValue;
                 teamRes.CurrentValue = value;
+                state.EventBus?.Raise(new ResourceChangedEvent(state.TurnNumber, unit, resource, oldTeam, teamRes.CurrentValue));
                 break;
             case ResourceOwnershipScope.Global:
                 if (!state.GlobalResources.TryGetValue(resourceId, out var globalRes))
@@ -195,7 +213,9 @@ public sealed class CombatRules
                     globalRes = new ResourceInstance(resource, resource.DefaultValue);
                     state.GlobalResources[resourceId] = globalRes;
                 }
+                int oldGlobal = globalRes.CurrentValue;
                 globalRes.CurrentValue = value;
+                state.EventBus?.Raise(new ResourceChangedEvent(state.TurnNumber, unit, resource, oldGlobal, globalRes.CurrentValue));
                 break;
         }
     }
@@ -278,6 +298,15 @@ public sealed class CombatRules
         }
     }
 
+    public void InitializeGlobalResource(BattleState state, ResourceDefinition resource, int initialValue)
+    {
+        if (resource == null) return;
+        if (!state.GlobalResources.ContainsKey(resource.Id))
+        {
+            state.GlobalResources[resource.Id] = new ResourceInstance(resource, initialValue);
+        }
+    }
+
     private void InitializeResource(BattleState state, UnitState unit, ResourceDefinition resource, int initialValue)
     {
         switch (resource.OwnershipScope)
@@ -332,18 +361,82 @@ public sealed class CombatRules
         }
     }
 
-    public List<UnitState> GetTurnPreview(BattleState state, int count)
+    // ─────────────────────── Turn Effects ─────────────────────────
+
+    private void ExecuteAllTurnEffects(
+        BattleState state, UnitState activeUnit, TurnTickTiming timing,
+        List<TurnEffectDefinition> globalTurnEffects)
+    {
+        // Unit innate turn effects
+        ExecuteTurnEffects(state, activeUnit, timing, activeUnit.Definition.TurnEffects, activeUnit);
+
+        // Status turn effects (for all living units)
+        foreach (var unit in state.Units.Where(u => u.IsAlive))
+        {
+            foreach (var status in unit.Statuses)
+            {
+                if (status.Definition.TurnEffects == null)
+                    continue;
+                ExecuteTurnEffects(state, activeUnit, timing, status.Definition.TurnEffects, unit);
+            }
+        }
+
+        // Global turn effects
+        if (globalTurnEffects != null)
+            ExecuteTurnEffects(state, activeUnit, timing, globalTurnEffects, activeUnit);
+    }
+
+    public void ExecuteTurnEffects(
+        BattleState state, UnitState activeUnit, TurnTickTiming timing,
+        List<TurnEffectDefinition> effects, UnitState owner)
+    {
+        if (effects == null) return;
+
+        foreach (var turnEffect in effects)
+        {
+            if (turnEffect == null || turnEffect.Timing != timing)
+                continue;
+
+            var targets = ResolveTurnEffectTargets(state, owner, turnEffect.TargetScope);
+            if (targets.Count == 0)
+                continue;
+
+            var execution = new ActionExecution(owner, null, targets);
+            foreach (var effect in turnEffect.Effects)
+            {
+                if (effect != null)
+                    effect.Apply(state, execution, this);
+            }
+        }
+    }
+
+    public static List<UnitState> ResolveTurnEffectTargets(
+        BattleState state, UnitState owner, TurnEffectTargetScope scope)
+    {
+        return scope switch
+        {
+            TurnEffectTargetScope.Self => owner.IsAlive
+                ? new List<UnitState> { owner }
+                : new List<UnitState>(),
+            TurnEffectTargetScope.AlliesOfOwner => state.GetAlliesOf(owner).ToList(),
+            TurnEffectTargetScope.EnemiesOfOwner => state.GetEnemiesOf(owner).ToList(),
+            TurnEffectTargetScope.AllUnits => state.LivingUnits.ToList(),
+            _ => new List<UnitState>()
+        };
+    }
+
+    public List<TurnPreviewEntry> GetTurnPreview(BattleState state, int count)
     {
         var living = state.LivingUnits.ToList();
         if (living.Count == 0 || count == 0)
-            return new List<UnitState>();
+            return new List<TurnPreviewEntry>();
 
-        var result = new List<UnitState>(count);
+        var result = new List<TurnPreviewEntry>(count);
         int startIndex = state.ActiveUnit != null ? living.IndexOf(state.ActiveUnit) : 0;
         if (startIndex < 0) startIndex = 0;
 
         for (int i = 0; i < count; i++)
-            result.Add(living[(startIndex + i) % living.Count]);
+            result.Add(new TurnPreviewEntry(living[(startIndex + i) % living.Count], 0));
 
         return result;
     }

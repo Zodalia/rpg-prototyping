@@ -9,12 +9,14 @@ public sealed class BattleScreenUI : MonoBehaviour
     [Header("References")]
     [SerializeField] private BattleController battleController;
     [SerializeField] private UIDocument uiDocument;
+    [SerializeField] private EncounterManager encounterManager;
 
     [Header("Templates")]
     [SerializeField] private VisualTreeAsset unitCardTemplate;
     [SerializeField] private VisualTreeAsset actionButtonTemplate;
     [SerializeField] private VisualTreeAsset statusIconTemplate;
     [SerializeField] private VisualTreeAsset resourceEntryTemplate;
+    [SerializeField] private VisualTreeAsset battleSelectTemplate;
 
     [Header("Options")]
     [SerializeField] private bool showUnitResources;
@@ -53,7 +55,13 @@ public sealed class BattleScreenUI : MonoBehaviour
     private UnitState _deferredActor;
     private List<ActionDefinition> _deferredActions;
     private BattleEventBus _subscribedBus;
-    private List<UnitState> _baselineTurnPreview = new();
+    private List<TurnPreviewEntry> _baselineTurnPreview = new();
+
+    // Battle selection
+    private VisualElement _battleRoot;
+    private VisualElement _selectRoot;
+    private VisualElement _battleListContent;
+    private Button _randomButton;
 
     private void OnEnable()
     {
@@ -66,6 +74,19 @@ public sealed class BattleScreenUI : MonoBehaviour
 
         _cancelButton.clicked += CancelTargeting;
         _cancelButton.AddToClassList("hidden");
+
+        if (encounterManager != null)
+        {
+            encounterManager.ShowBattleMenu += OnShowBattleMenu;
+            encounterManager.BattleStarting += OnBattleStarting;
+
+            // Hide battle screen until a battle is selected
+            if (_battleRoot != null)
+                _battleRoot.style.display = DisplayStyle.None;
+
+            // Kick off encounter flow if it hasn't started yet
+            encounterManager.Begin();
+        }
     }
 
     private void OnDisable()
@@ -81,10 +102,17 @@ public sealed class BattleScreenUI : MonoBehaviour
         }
 
         _cancelButton.clicked -= CancelTargeting;
+
+        if (encounterManager != null)
+        {
+            encounterManager.ShowBattleMenu -= OnShowBattleMenu;
+            encounterManager.BattleStarting -= OnBattleStarting;
+        }
     }
 
     private void CacheElements()
     {
+        _battleRoot = _root.Q("battle-root");
         _allyColumn = _root.Q("ally-column");
         _enemyColumn = _root.Q("enemy-column");
         _actionBar = _root.Q("action-bar");
@@ -103,6 +131,7 @@ public sealed class BattleScreenUI : MonoBehaviour
             return;
 
         SubscribeToEventBus();
+        RebuildUnitCardsIfNewBattle();
         SpawnUnitCardsIfNeeded();
         RefreshAll();
 
@@ -222,6 +251,10 @@ public sealed class BattleScreenUI : MonoBehaviour
                 $"{statusTick.Unit.Definition.DisplayName} takes {statusTick.Damage} from {statusTick.Status.DisplayName}",
             StatusExpiredEvent statusExpired =>
                 $"{statusExpired.Unit.Definition.DisplayName} loses {statusExpired.Status.DisplayName}",
+            ResourceChangedEvent resourceChanged =>
+                resourceChanged.Unit != null
+                    ? $"{resourceChanged.Unit.Definition.DisplayName} {(resourceChanged.NewValue > resourceChanged.OldValue ? "gains" : "loses")} {Mathf.Abs(resourceChanged.NewValue - resourceChanged.OldValue)} {resourceChanged.Resource.DisplayName}"
+                    : $"{(resourceChanged.NewValue > resourceChanged.OldValue ? "Gains" : "Loses")} {Mathf.Abs(resourceChanged.NewValue - resourceChanged.OldValue)} {resourceChanged.Resource.DisplayName}",
             _ => null
         };
     }
@@ -297,16 +330,17 @@ public sealed class BattleScreenUI : MonoBehaviour
 
     // ─────────────────────── Turn Tracker ─────────────────────────
 
-    private List<UnitState> ComputeTurnPreview(ActionDefinition hoverAction)
+    private List<TurnPreviewEntry> ComputeTurnPreview(ActionDefinition hoverAction)
     {
         var state = battleController.State;
-        if (state == null) return new List<UnitState>();
+        if (state == null) return new List<TurnPreviewEntry>();
 
         var strategy = battleController.TurnOrderStrategy;
         if (strategy != null)
         {
             return strategy.GetTurnPreview(
                 state, battleController.EnemyAi, turnPreviewCount,
+                battleController.GlobalTurnEffects,
                 hoverAction, _pendingActor);
         }
 
@@ -323,11 +357,13 @@ public sealed class BattleScreenUI : MonoBehaviour
 
         for (int i = 0; i < preview.Count; i++)
         {
-            var unit = preview[i];
+            var previewEntry = preview[i];
+            var unit = previewEntry.Unit;
             var el = turnTrackerEntryTemplate.CloneTree();
             var entry = el.Q(className: "turn-entry");
 
             el.Q<Label>("turn-entry-name").text = unit.Definition.DisplayName;
+            el.Q<Label>("turn-entry-delay").text = previewEntry.ResourceValue.ToString();
 
             if (i == 0)
                 entry.AddToClassList("turn-entry--current");
@@ -337,7 +373,7 @@ public sealed class BattleScreenUI : MonoBehaviour
                 : "turn-entry--enemy");
 
             bool isSpeculative = hoverAction != null &&
-                (i >= _baselineTurnPreview.Count || _baselineTurnPreview[i] != unit);
+                (i >= _baselineTurnPreview.Count || _baselineTurnPreview[i].Unit != unit);
             if (isSpeculative)
                 entry.AddToClassList("turn-entry--speculative");
 
@@ -365,6 +401,28 @@ public sealed class BattleScreenUI : MonoBehaviour
             parent.Add(tree);
             _unitCards.Add(controller);
         }
+    }
+
+    private void RebuildUnitCardsIfNewBattle()
+    {
+        if (_unitCards.Count == 0)
+            return;
+
+        // If the first tracked unit isn't in the current state, it's a new battle
+        if (battleController.State.Units.Contains(_unitCards[0].Unit))
+            return;
+
+        _unitCards.Clear();
+        _allyColumn.Clear();
+        _enemyColumn.Clear();
+        _pendingGroups.Clear();
+        _logLines.Clear();
+        _combatLogContent.Clear();
+        _pendingActor = null;
+        _pendingAction = null;
+        _deferredActor = null;
+        _deferredActions = null;
+        ClearActionButtons();
     }
 
     // ─────────────────────── Actions ──────────────────────────────
@@ -503,5 +561,47 @@ public sealed class BattleScreenUI : MonoBehaviour
         var endLabel = new Label($"\n{winner} wins.");
         endLabel.AddToClassList("log-entry");
         _combatLogContent.Add(endLabel);
+    }
+
+    // ─────────────────── Battle Selection ──────────────────────
+
+    private void OnShowBattleMenu(List<BattleDefinition> battles)
+    {
+        EnsureSelectUI();
+        _selectRoot.style.display = DisplayStyle.Flex;
+        _battleRoot.style.display = DisplayStyle.None;
+
+        _battleListContent.Clear();
+
+        foreach (var battle in battles)
+        {
+            var button = new Button(() => encounterManager.SelectBattle(battle))
+            {
+                text = battle.DisplayName,
+            };
+            button.AddToClassList("battle-select-button");
+            _battleListContent.Add(button);
+        }
+    }
+
+    private void OnBattleStarting()
+    {
+        if (_selectRoot != null)
+            _selectRoot.style.display = DisplayStyle.None;
+
+        _battleRoot.style.display = DisplayStyle.Flex;
+    }
+
+    private void EnsureSelectUI()
+    {
+        if (_selectRoot != null) return;
+
+        var template = battleSelectTemplate.Instantiate();
+        _selectRoot = template.Q("battle-select-root");
+        _battleListContent = template.Q("battle-list-content");
+        _randomButton = template.Q<Button>("random-battle-button");
+        _randomButton.clicked += () => encounterManager.StartRandomBattle();
+
+        _root.Add(template);
     }
 }

@@ -12,6 +12,8 @@ public sealed class ResourceThresholdTurnOrder : TurnOrderStrategy
     [field: SerializeField] public ResourceDefinition RankingResource { get; private set; }
     [field: SerializeField] public bool RankDescending { get; private set; } = true;
 
+    public override ResourceDefinition DisplayResource => ReadinessResource;
+
     protected override UnitState SelectFromCandidates(
         List<UnitState> candidates, BattleState state, CombatRules rules)
     {

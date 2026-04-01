@@ -42,12 +42,15 @@ public abstract class TurnOrderStrategy : ScriptableObject
     protected abstract UnitState SelectFromCandidates(
         List<UnitState> candidates, BattleState state, CombatRules rules);
 
-    public virtual List<UnitState> GetTurnPreview(
+    public virtual ResourceDefinition DisplayResource => null;
+
+    public virtual List<TurnPreviewEntry> GetTurnPreview(
         BattleState state, EnemyAi enemyAi, int count,
+        List<TurnEffectDefinition> globalTurnEffects = null,
         ActionDefinition playerHoverAction = null,
         UnitState playerActor = null)
     {
-        var result = new List<UnitState>(count);
+        var result = new List<TurnPreviewEntry>(count);
         if (count == 0) return result;
 
         var current = state.ActiveUnit;
@@ -57,9 +60,10 @@ public abstract class TurnOrderStrategy : ScriptableObject
         var simRules = new CombatRules { ActiveSnapshot = snapshot };
 
         // Slot 0: current active unit
-        result.Add(current);
+        result.Add(new TurnPreviewEntry(current, GetDisplayValue(snapshot, state, current)));
         SimulateUnitAction(snapshot, state, simRules, enemyAi, current,
             current == playerActor ? playerHoverAction : null);
+        ActionSimulator.SimulateAllTurnEffects(snapshot, state, current, TurnTickTiming.TurnEnd, globalTurnEffects);
         snapshot.UnitsActedThisRound.Add(current.UnitId);
 
         // Slots 1..N
@@ -87,12 +91,21 @@ public abstract class TurnOrderStrategy : ScriptableObject
             var selected = SelectFromCandidates(candidates, state, simRules);
             if (selected == null) selected = candidates[0];
 
-            result.Add(selected);
+            ActionSimulator.SimulateAllTurnEffects(snapshot, state, selected, TurnTickTiming.TurnStart, globalTurnEffects);
+            result.Add(new TurnPreviewEntry(selected, GetDisplayValue(snapshot, state, selected)));
             SimulateUnitAction(snapshot, state, simRules, enemyAi, selected, null);
+            ActionSimulator.SimulateAllTurnEffects(snapshot, state, selected, TurnTickTiming.TurnEnd, globalTurnEffects);
             snapshot.UnitsActedThisRound.Add(selected.UnitId);
         }
 
         return result;
+    }
+
+    private int GetDisplayValue(ResourceSnapshot snapshot, BattleState state, UnitState unit)
+    {
+        var res = DisplayResource;
+        if (res == null) return 0;
+        return snapshot.GetResource(state, unit, res.Id);
     }
 
     private void SimulateUnitAction(

@@ -157,8 +157,11 @@ public sealed class DebugPanel : MonoBehaviour
         AddButton(row, "Skip Turn", SkipTurn);
         AddButton(row, "Restart", () =>
         {
-            battleController.StartBattle();
-            Rebuild();
+            if (battleController.CurrentBattle != null && battleController.CurrentParty != null)
+            {
+                battleController.StartBattle(battleController.CurrentBattle, battleController.CurrentParty);
+                Rebuild();
+            }
         });
 
         var row2 = AddRow();

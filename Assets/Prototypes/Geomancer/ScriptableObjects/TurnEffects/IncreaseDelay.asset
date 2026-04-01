@@ -1,0 +1,26 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d8fde4331ca2e284ea64282d239a2845, type: 3}
+  m_Name: IncreaseDelay
+  m_EditorClassIdentifier: Assembly-CSharp::TurnEffectDefinition
+  <Timing>k__BackingField: 1
+  <TargetScope>k__BackingField: 0
+  <Effects>k__BackingField:
+  - rid: 4305622282184949820
+  references:
+    version: 2
+    RefIds:
+    - rid: 4305622282184949820
+      type: {class: GainResourceEffectConfig, ns: , asm: Assembly-CSharp}
+      data:
+        resource: {fileID: 11400000, guid: d943ed5ad5db6ba4883f801e78b5b7a9, type: 2}
+        amount: 3
