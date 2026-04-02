@@ -93,7 +93,7 @@ public abstract class TurnOrderStrategy : ScriptableObject
 
             ActionSimulator.SimulateAllTurnEffects(snapshot, state, selected, TurnTickTiming.TurnStart, globalTurnEffects);
             result.Add(new TurnPreviewEntry(selected, GetDisplayValue(snapshot, state, selected)));
-            SimulateUnitAction(snapshot, state, simRules, enemyAi, selected, null);
+            //SimulateUnitAction(snapshot, state, simRules, enemyAi, selected, null);
             ActionSimulator.SimulateAllTurnEffects(snapshot, state, selected, TurnTickTiming.TurnEnd, globalTurnEffects);
             snapshot.UnitsActedThisRound.Add(selected.UnitId);
         }
