@@ -10,14 +10,14 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 5f65c513740cf974099f6475ea53048f, type: 3}
-  m_Name: Earth
+  m_Name: Yellow
   m_EditorClassIdentifier: Assembly-CSharp::ResourceDefinition
   <Id>k__BackingField: earth
   <DisplayName>k__BackingField: Earth
-  <Icon>k__BackingField: {fileID: 21300000, guid: 090a3496d81714c44ad0cd6ae21bf6b0, type: 3}
+  <Icon>k__BackingField: {fileID: 10905, guid: 0000000000000000f000000000000000, type: 0}
   <IconColor>k__BackingField:
     serializedVersion: 2
-    rgba: 4281160352
+    rgba: 4278245375
   <PlayerFacing>k__BackingField: 1
   <DefaultValue>k__BackingField: 0
   <DecayPerTurn>k__BackingField: 0

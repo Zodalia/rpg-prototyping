@@ -453,6 +453,23 @@ public sealed class BattleScreenUI : MonoBehaviour
             var button = tree.Q<Button>("action-button");
             button.Q<Label>("label").text = action.DisplayName;
 
+            var costContainer = button.Q("cost-container");
+            foreach (var req in action.ResourceRequirements)
+            {
+                if (req.Resource == null || req.Amount <= 0)
+                    continue;
+
+                var entry = resourceEntryTemplate.CloneTree();
+                var icon = entry.Q("icon");
+                if (req.Resource.Icon != null)
+                {
+                    icon.style.backgroundImage = new StyleBackground(req.Resource.Icon);
+                    icon.style.unityBackgroundImageTintColor = (Color)req.Resource.IconColor;
+                }
+                entry.Q<Label>("value").text = req.Amount.ToString();
+                costContainer.Add(entry);
+            }
+
             var captured = action;
             button.clicked += () => OnActionChosen(captured);
             button.RegisterCallback<MouseEnterEvent>(_ =>

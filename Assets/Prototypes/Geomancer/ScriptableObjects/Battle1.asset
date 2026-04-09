@@ -18,10 +18,13 @@ MonoBehaviour:
   - {fileID: 11400000, guid: a236d9e951052a14f8a1ca0c2286b9ec, type: 2}
   - {fileID: 11400000, guid: c05585b5537f86c43b89fcc0346c0bb5, type: 2}
   <TurnOrderStrategy>k__BackingField: {fileID: 11400000, guid: 0ca9b9f4520c1224bbe3298d424a3d47, type: 2}
+  <DeathConditionStrategy>k__BackingField: {fileID: 0}
   <GlobalTurnEffects>k__BackingField:
   - {fileID: 11400000, guid: 4b829812349901e4b838b37c31720eb2, type: 2}
   <StartingGlobalResources>k__BackingField:
   - resource: {fileID: 11400000, guid: 33efa4d68c2eb564e85d0fc55e51f984, type: 2}
     initialValue: 5
   - resource: {fileID: 11400000, guid: 2035e1a71aa5c2d4ebd6a15710094bb5, type: 2}
+    initialValue: 5
+  - resource: {fileID: 11400000, guid: c407045cf874fa14ebf525423b899e2f, type: 2}
     initialValue: 5

@@ -146,6 +146,27 @@
     border-color: #555;
     -unity-font-style: bold;
     font-size: 14px;
+    flex-direction: row;
+    align-items: center;
+}
+
+.action-cost-container {
+    flex-direction: row;
+    align-items: center;
+    margin-left: var(--spacing-md);
+}
+
+.action-cost-container .resource-entry {
+    margin-right: var(--spacing-sm);
+}
+
+.action-cost-container .resource-entry__value {
+    font-size: 11px;
+}
+
+.action-cost-container .resource-entry__icon {
+    width: 14px;
+    height: 14px;
 }
 
 .action-button:hover {
