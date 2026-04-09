@@ -10,7 +10,8 @@ public sealed class ActionDefinition : ScriptableObject
         SingleAlly,
         SingleEnemy,
         AllAllies,
-        AllEnemies
+        AllEnemies,
+        Pool
     }
 
     [field: SerializeField] public string Id { get; private set; }

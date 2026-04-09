@@ -410,3 +410,53 @@
     padding: 1px 0;
     white-space: normal;
 }
+
+/* ── Pool Cards ──────────────────────────────────────────── */
+
+#pool-container {
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: flex-start;
+    margin-top: var(--spacing-md);
+}
+
+#pool-container.hidden {
+    display: none;
+}
+
+.pool-card {
+    background-color: rgba(40, 60, 40, 0.85);
+    border-radius: 6px;
+    padding: var(--spacing-md);
+    margin: var(--spacing-sm);
+    align-items: center;
+    min-width: 80px;
+}
+
+.pool-card.pool--targetable {
+    background-color: var(--color-bg-targetable);
+}
+
+.pool-card.pool--depleted {
+    opacity: 0.4;
+}
+
+.pool-card__icon {
+    width: 32px;
+    height: 32px;
+    margin-bottom: var(--spacing-sm);
+    -unity-background-scale-mode: scale-to-fit;
+}
+
+.pool-card__name {
+    color: var(--color-text-primary);
+    font-size: 13px;
+    -unity-font-style: bold;
+}
+
+.pool-card__harvests {
+    color: var(--color-text-secondary);
+    font-size: 11px;
+    margin-top: 2px;
+}

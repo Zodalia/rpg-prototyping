@@ -9,6 +9,12 @@ public sealed class ActionExecutor
 
         foreach (var req in action.ResourceRequirements)
         {
+            if (req.IsTagBased)
+            {
+                rules.SpendTagResource(state, actor, req.Tag, req.Amount);
+                continue;
+            }
+
             if (req.Resource == null)
                 continue;
 

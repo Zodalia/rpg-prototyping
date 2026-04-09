@@ -1,0 +1,8 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements">
+    <ui:VisualElement class="pool-card">
+        <ui:VisualElement name="pool-icon" class="pool-card__icon" />
+        <ui:Label name="pool-name" class="pool-card__name" text="Pool" />
+        <ui:Label name="pool-harvests" class="pool-card__harvests" text="" />
+        <ui:Button name="pool-target-overlay" class="target-overlay hidden" />
+    </ui:VisualElement>
+</ui:UXML>

@@ -64,6 +64,15 @@ public sealed class BattleController : MonoBehaviour
             _rules.InitializeResources(State, unit);
         }
 
+        foreach (var poolDef in battle.StartingPools)
+        {
+            if (poolDef != null)
+            {
+                var pool = new PoolInstance($"pool-{State.Pools.Count}", poolDef);
+                State.Pools.Add(pool);
+            }
+        }
+
         BeginNextTurn();
         StateChanged?.Invoke();
     }

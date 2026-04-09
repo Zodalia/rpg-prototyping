@@ -10,6 +10,7 @@
             <ui:VisualElement name="turn-tracker" />
             <ui:VisualElement name="battlefield">
                 <ui:VisualElement name="enemy-column" />
+                <ui:VisualElement name="pool-container" class="hidden" />
             </ui:VisualElement>
         </ui:VisualElement>
 

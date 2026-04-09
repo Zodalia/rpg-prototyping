@@ -90,6 +90,70 @@ public sealed class ResourceSnapshot
         _overrides[ScopedKey(unit, resource.Id, scope)] = value;
     }
 
+    public int GetTagResource(BattleState state, UnitState unit, ResourceTag tag)
+    {
+        if (tag == null) return 0;
+
+        int total = 0;
+        foreach (var res in unit.Resources.Values)
+            if (res.Definition != null && res.Definition.HasTag(tag))
+                total += GetScopedValue(state, unit, res.Definition.Id, ResourceOwnershipScope.Unit);
+
+        if (state.TeamResources.TryGetValue(unit.Team, out var teamDict))
+            foreach (var res in teamDict.Values)
+                if (res.Definition != null && res.Definition.HasTag(tag))
+                    total += GetScopedValue(state, unit, res.Definition.Id, ResourceOwnershipScope.Team);
+
+        foreach (var res in state.GlobalResources.Values)
+            if (res.Definition != null && res.Definition.HasTag(tag))
+                total += GetScopedValue(state, unit, res.Definition.Id, ResourceOwnershipScope.Global);
+
+        return total;
+    }
+
+    public void SpendTagResource(BattleState state, UnitState unit, ResourceTag tag, int amount)
+    {
+        if (tag == null) return;
+
+        int remaining = amount;
+
+        // Drain Unit scope first
+        foreach (var res in unit.Resources.Values)
+        {
+            if (remaining <= 0) break;
+            if (res.Definition == null || !res.Definition.HasTag(tag)) continue;
+            remaining = DrainSnapshotPool(state, unit, res.Definition.Id, ResourceOwnershipScope.Unit, remaining);
+        }
+
+        // Then Team scope
+        if (remaining > 0 && state.TeamResources.TryGetValue(unit.Team, out var teamDict))
+            foreach (var res in teamDict.Values)
+            {
+                if (remaining <= 0) break;
+                if (res.Definition == null || !res.Definition.HasTag(tag)) continue;
+                remaining = DrainSnapshotPool(state, unit, res.Definition.Id, ResourceOwnershipScope.Team, remaining);
+            }
+
+        // Then Global scope
+        if (remaining > 0)
+            foreach (var res in state.GlobalResources.Values)
+            {
+                if (remaining <= 0) break;
+                if (res.Definition == null || !res.Definition.HasTag(tag)) continue;
+                remaining = DrainSnapshotPool(state, unit, res.Definition.Id, ResourceOwnershipScope.Global, remaining);
+            }
+    }
+
+    private int DrainSnapshotPool(BattleState state, UnitState unit, string resourceId,
+        ResourceOwnershipScope scope, int remaining)
+    {
+        int current = GetScopedValue(state, unit, resourceId, scope);
+        if (current <= 0) return remaining;
+        int drain = current < remaining ? current : remaining;
+        _overrides[ScopedKey(unit, resourceId, scope)] = current - drain;
+        return remaining - drain;
+    }
+
     private int GetScopedValue(BattleState state, UnitState unit, string resourceId,
         ResourceOwnershipScope scope)
     {

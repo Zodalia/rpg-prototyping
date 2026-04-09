@@ -145,3 +145,40 @@ public sealed class ResourceChangedEvent : BattleEvent
         Scope = scope;
     }
 }
+
+public sealed class PoolHarvestedEvent : BattleEvent
+{
+    public UnitState Actor { get; }
+    public PoolInstance Pool { get; }
+    public ResourceDefinition Resource { get; }
+    public int Amount { get; }
+
+    public PoolHarvestedEvent(int turnNumber, UnitState actor, PoolInstance pool,
+        ResourceDefinition resource, int amount) : base(turnNumber)
+    {
+        Actor = actor;
+        Pool = pool;
+        Resource = resource;
+        Amount = amount;
+    }
+}
+
+public sealed class PoolDepletedEvent : BattleEvent
+{
+    public PoolInstance Pool { get; }
+
+    public PoolDepletedEvent(int turnNumber, PoolInstance pool) : base(turnNumber)
+    {
+        Pool = pool;
+    }
+}
+
+public sealed class PoolSpawnedEvent : BattleEvent
+{
+    public PoolInstance Pool { get; }
+
+    public PoolSpawnedEvent(int turnNumber, PoolInstance pool) : base(turnNumber)
+    {
+        Pool = pool;
+    }
+}

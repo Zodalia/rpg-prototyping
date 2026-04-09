@@ -13,6 +13,7 @@ public sealed class BattleDefinition : ScriptableObject
     [field: SerializeField] public DeathConditionStrategy DeathConditionStrategy { get; private set; }
     [field: SerializeField] public List<TurnEffectDefinition> GlobalTurnEffects { get; private set; } = new();
     [field: SerializeField] public List<GlobalResourceEntry> StartingGlobalResources { get; private set; } = new();
+    [field: SerializeField] public List<PoolDefinition> StartingPools { get; private set; } = new();
 }
 
 [Serializable]

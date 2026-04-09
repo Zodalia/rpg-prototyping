@@ -17,6 +17,7 @@ public sealed class BattleScreenUI : MonoBehaviour
     [SerializeField] private VisualTreeAsset statusIconTemplate;
     [SerializeField] private VisualTreeAsset resourceEntryTemplate;
     [SerializeField] private VisualTreeAsset battleSelectTemplate;
+    [SerializeField] private VisualTreeAsset poolCardTemplate;
 
     [Header("Options")]
     [SerializeField] private bool showUnitResources;
@@ -43,9 +44,11 @@ public sealed class BattleScreenUI : MonoBehaviour
     private VisualElement _resourceBar;
     private VisualElement _turnTracker;
     private VisualElement _previewPanel;
+    private VisualElement _poolContainer;
 
     // State
     private readonly List<UnitCardController> _unitCards = new();
+    private readonly List<(PoolInstance pool, VisualElement element)> _poolCards = new();
     private UnitState _pendingActor;
     private ActionDefinition _pendingAction;
 
@@ -122,6 +125,7 @@ public sealed class BattleScreenUI : MonoBehaviour
         _combatLogContent = _root.Q("combat-log-content");
         _resourceBar = _root.Q("resource-bar");
         _turnTracker = _root.Q("turn-tracker");
+        _poolContainer = _root.Q("pool-container");
 
         _previewPanel = new VisualElement();
         _previewPanel.AddToClassList("action-preview-panel");
@@ -262,6 +266,12 @@ public sealed class BattleScreenUI : MonoBehaviour
                 resourceChanged.Unit != null
                     ? $"{resourceChanged.Unit.Definition.DisplayName} {(resourceChanged.NewValue > resourceChanged.OldValue ? "gains" : "loses")} {Mathf.Abs(resourceChanged.NewValue - resourceChanged.OldValue)} {resourceChanged.Resource.DisplayName}"
                     : $"{(resourceChanged.NewValue > resourceChanged.OldValue ? "Gains" : "Loses")} {Mathf.Abs(resourceChanged.NewValue - resourceChanged.OldValue)} {resourceChanged.Resource.DisplayName}",
+            PoolHarvestedEvent poolHarvest =>
+                $"{poolHarvest.Actor.Definition.DisplayName} harvests {poolHarvest.Amount} {poolHarvest.Resource.DisplayName} from {poolHarvest.Pool.Definition.DisplayName}",
+            PoolDepletedEvent poolDepleted =>
+                $"{poolDepleted.Pool.Definition.DisplayName} is depleted",
+            PoolSpawnedEvent poolSpawned =>
+                $"{poolSpawned.Pool.Definition.DisplayName} appears",
             _ => null
         };
     }
@@ -275,6 +285,7 @@ public sealed class BattleScreenUI : MonoBehaviour
             card.Refresh(activeUnit);
 
         RefreshResourceBar();
+        RefreshPoolCards();
 
         _baselineTurnPreview = ComputeTurnPreview(null);
         RefreshTurnTracker(null);
@@ -333,6 +344,52 @@ public sealed class BattleScreenUI : MonoBehaviour
         }
         el.Q<Label>("value").text = resource.CurrentValue.ToString();
         parent.Add(el);
+    }
+
+    // ─────────────────────── Pool Cards ───────────────────────────
+
+    private void RefreshPoolCards()
+    {
+        var state = battleController.State;
+        if (state == null || poolCardTemplate == null) return;
+
+        // Rebuild pool cards if count changed (spawns/new battle)
+        if (_poolCards.Count != state.Pools.Count)
+        {
+            _poolContainer.Clear();
+            _poolCards.Clear();
+
+            foreach (var pool in state.Pools)
+            {
+                var tree = poolCardTemplate.CloneTree();
+                var card = tree.Q(className: "pool-card");
+
+                card.Q<Label>("pool-name").text = pool.Definition.DisplayName;
+
+                var icon = card.Q("pool-icon");
+                if (pool.Definition.Icon != null)
+                {
+                    icon.style.backgroundImage = new StyleBackground(pool.Definition.Icon);
+                    icon.style.unityBackgroundImageTintColor = (Color)pool.Definition.IconColor;
+                }
+
+                _poolContainer.Add(tree);
+                _poolCards.Add((pool, card));
+            }
+        }
+
+        // Refresh state
+        foreach (var (pool, card) in _poolCards)
+        {
+            if (pool.Definition.MaxHarvests >= 0)
+                card.Q<Label>("pool-harvests").text = $"{pool.RemainingHarvests} left";
+            else
+                card.Q<Label>("pool-harvests").text = "\u221E"; // ∞
+
+            card.EnableInClassList("pool--depleted", pool.IsDepleted);
+        }
+
+        _poolContainer.EnableInClassList("hidden", state.Pools.Count == 0);
     }
 
     // ─────────────────────── Turn Tracker ─────────────────────────
@@ -420,8 +477,10 @@ public sealed class BattleScreenUI : MonoBehaviour
             return;
 
         _unitCards.Clear();
+        _poolCards.Clear();
         _allyColumn.Clear();
         _enemyColumn.Clear();
+        _poolContainer.Clear();
         _pendingGroups.Clear();
         _logLines.Clear();
         _combatLogContent.Clear();
@@ -456,17 +515,26 @@ public sealed class BattleScreenUI : MonoBehaviour
             var costContainer = button.Q("cost-container");
             foreach (var req in action.ResourceRequirements)
             {
-                if (req.Resource == null || req.Amount <= 0)
-                    continue;
+                if (req.Amount <= 0) continue;
+                if (!req.IsTagBased && req.Resource == null) continue;
 
                 var entry = resourceEntryTemplate.CloneTree();
                 var icon = entry.Q("icon");
-                if (req.Resource.Icon != null)
+
+                if (req.IsTagBased)
                 {
-                    icon.style.backgroundImage = new StyleBackground(req.Resource.Icon);
-                    icon.style.unityBackgroundImageTintColor = (Color)req.Resource.IconColor;
+                    // Tag-based: no icon, just show tag name + amount
+                    entry.Q<Label>("value").text = $"{req.Amount} {req.Tag.DisplayName}";
                 }
-                entry.Q<Label>("value").text = req.Amount.ToString();
+                else
+                {
+                    if (req.Resource.Icon != null)
+                    {
+                        icon.style.backgroundImage = new StyleBackground(req.Resource.Icon);
+                        icon.style.unityBackgroundImageTintColor = (Color)req.Resource.IconColor;
+                    }
+                    entry.Q<Label>("value").text = req.Amount.ToString();
+                }
                 costContainer.Add(entry);
             }
 
@@ -512,6 +580,10 @@ public sealed class BattleScreenUI : MonoBehaviour
             case ActionDefinition.TargetType.SingleAlly:
                 EnterTargetingMode(action, state.GetAlliesOf(_pendingActor));
                 break;
+
+            case ActionDefinition.TargetType.Pool:
+                EnterPoolTargetingMode(action);
+                break;
         }
     }
 
@@ -541,6 +613,39 @@ public sealed class BattleScreenUI : MonoBehaviour
         ClearTargeting();
 
         Submit(action, new List<UnitState> { target });
+    }
+
+    private void EnterPoolTargetingMode(ActionDefinition action)
+    {
+        _pendingAction = action;
+        ClearActionButtons();
+        _cancelButton.RemoveFromClassList("hidden");
+
+        foreach (var (pool, card) in _poolCards)
+        {
+            if (pool.IsDepleted) continue;
+
+            card.AddToClassList("pool--targetable");
+            var overlay = card.Q<Button>("pool-target-overlay");
+            overlay.RemoveFromClassList("hidden");
+
+            var capturedPool = pool;
+            overlay.clicked += () => OnPoolChosen(capturedPool);
+        }
+    }
+
+    private void OnPoolChosen(PoolInstance pool)
+    {
+        if (_pendingAction == null) return;
+
+        var action = _pendingAction;
+        _pendingAction = null;
+        ClearTargeting();
+
+        ClearActionButtons();
+        _cancelButton.AddToClassList("hidden");
+
+        battleController.SubmitAction(new ActionExecution(_pendingActor, action, pool));
     }
 
     private void CancelTargeting()
@@ -624,6 +729,14 @@ public sealed class BattleScreenUI : MonoBehaviour
     {
         foreach (var card in _unitCards)
             card.SetTargetable(false);
+
+        foreach (var (_, card) in _poolCards)
+        {
+            card.RemoveFromClassList("pool--targetable");
+            var overlay = card.Q<Button>("pool-target-overlay");
+            overlay.AddToClassList("hidden");
+            overlay.clickable = new Clickable(() => { });
+        }
     }
 
     private void OnBattleEnded(string winner)

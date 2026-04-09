@@ -1,0 +1,28 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5f65c513740cf974099f6475ea53048f, type: 3}
+  m_Name: Seaweed
+  m_EditorClassIdentifier: Assembly-CSharp::ResourceDefinition
+  <Id>k__BackingField: seaweed
+  <DisplayName>k__BackingField: Seaweed
+  <Icon>k__BackingField: {fileID: 21300000, guid: cc5899b83a077e148a61ad00dc06d68e, type: 3}
+  <IconColor>k__BackingField:
+    serializedVersion: 2
+    rgba: 4280520299
+  <PlayerFacing>k__BackingField: 1
+  <DefaultValue>k__BackingField: 0
+  <DecayPerTurn>k__BackingField: 0
+  <DefaultMaxValue>k__BackingField: -1
+  <AllowedScopes>k__BackingField: 01000000
+  <Tags>k__BackingField:
+  - {fileID: 11400000, guid: 4c00f25dcee83814a8e7d1e5a08a8aed, type: 2}
+  <OwnershipScope>k__BackingField: 1

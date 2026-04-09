@@ -38,12 +38,24 @@ public sealed class CombatRules
 
         foreach (var req in action.ResourceRequirements)
         {
-            if (req.Resource == null)
-                continue;
+            if (req.IsTagBased)
+            {
+                if (GetTagResourceAmount(state, unit, req.Tag) < req.Amount)
+                    return false;
+            }
+            else
+            {
+                if (req.Resource == null)
+                    continue;
 
-            if (GetResourceAmount(state, unit, req.Resource) < req.Amount)
-                return false;
+                if (GetResourceAmount(state, unit, req.Resource) < req.Amount)
+                    return false;
+            }
         }
+
+        if (action.Targeting == ActionDefinition.TargetType.Pool &&
+            !state.ActivePools.Any())
+            return false;
 
         if (unit.Cooldowns.TryGetValue(action.Id, out int cooldown) && cooldown > 0)
             return false;
@@ -408,6 +420,69 @@ public sealed class CombatRules
 
         if (DeathCondition != null)
             CheckAndApplyDeath(state, unit);
+    }
+
+    // ─────────────────────── Tag Resources ────────────────────────
+
+    public int GetTagResourceAmount(BattleState state, UnitState unit, ResourceTag tag)
+    {
+        if (tag == null) return 0;
+
+        if (ActiveSnapshot != null)
+            return ActiveSnapshot.GetTagResource(state, unit, tag);
+
+        int total = 0;
+        foreach (var res in unit.Resources.Values)
+            if (res.Definition != null && res.Definition.HasTag(tag))
+                total += res.CurrentValue;
+
+        if (state.TeamResources.TryGetValue(unit.Team, out var teamDict))
+            foreach (var res in teamDict.Values)
+                if (res.Definition != null && res.Definition.HasTag(tag))
+                    total += res.CurrentValue;
+
+        foreach (var res in state.GlobalResources.Values)
+            if (res.Definition != null && res.Definition.HasTag(tag))
+                total += res.CurrentValue;
+
+        return total;
+    }
+
+    public void SpendTagResource(BattleState state, UnitState unit, ResourceTag tag, int amount)
+    {
+        if (tag == null) return;
+
+        int remaining = amount;
+
+        // Drain Unit scope first, then Team, then Global
+        remaining = DrainTaggedPools(state, unit, tag, remaining, unit.Resources.Values, ResourceOwnershipScope.Unit);
+
+        if (remaining > 0 && state.TeamResources.TryGetValue(unit.Team, out var teamDict))
+            remaining = DrainTaggedPools(state, unit, tag, remaining, teamDict.Values, ResourceOwnershipScope.Team);
+
+        if (remaining > 0)
+            DrainTaggedPools(state, unit, tag, remaining, state.GlobalResources.Values, ResourceOwnershipScope.Global);
+
+        if (DeathCondition != null)
+            CheckAndApplyDeath(state, unit);
+    }
+
+    private int DrainTaggedPools(BattleState state, UnitState unit, ResourceTag tag,
+        int remaining, IEnumerable<ResourceInstance> pools, ResourceOwnershipScope scope)
+    {
+        foreach (var pool in pools)
+        {
+            if (remaining <= 0) break;
+            if (pool.Definition == null || !pool.Definition.HasTag(tag)) continue;
+            if (pool.CurrentValue <= 0) continue;
+
+            int drain = pool.CurrentValue < remaining ? pool.CurrentValue : remaining;
+            int old = pool.CurrentValue;
+            pool.CurrentValue -= drain;
+            remaining -= drain;
+            state.EventBus?.Raise(new ResourceChangedEvent(state.TurnNumber, unit, pool.Definition, old, pool.CurrentValue, scope));
+        }
+        return remaining;
     }
 
     private bool IsTurnCounted(StatusInstance status, UnitState ownerUnit, UnitState activeUnit)

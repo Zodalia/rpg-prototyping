@@ -8,6 +8,15 @@ public sealed class EnemyAi
         var available = rules.GetAvailableActions(state, actor);
         var chosen = available.First();
 
+        if (chosen.Targeting == ActionDefinition.TargetType.Pool)
+        {
+            var pool = state.ActivePools.FirstOrDefault();
+            if (pool != null)
+                return new ActionExecution(actor, chosen, pool);
+            // Fallback: no pool available, use empty targets
+            return new ActionExecution(actor, chosen, new List<UnitState>());
+        }
+
         var targets = ResolveDefaultTargets(state, actor, chosen);
         return new ActionExecution(actor, chosen, targets);
     }

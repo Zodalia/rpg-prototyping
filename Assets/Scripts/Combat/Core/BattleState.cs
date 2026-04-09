@@ -4,6 +4,7 @@ using System.Linq;
 public sealed class BattleState
 {
     public List<UnitState> Units { get; } = new();
+    public List<PoolInstance> Pools { get; } = new();
     public UnitState ActiveUnit { get; set; }
     public int TurnNumber { get; set; } = 1;
     public bool IsBattleOver { get; set; }
@@ -16,6 +17,7 @@ public sealed class BattleState
     public Dictionary<string, ResourceInstance> GlobalResources { get; } = new();
 
     public IEnumerable<UnitState> LivingUnits => Units.Where(u => u.IsAlive);
+    public IEnumerable<PoolInstance> ActivePools => Pools.Where(p => !p.IsDepleted);
 
     public IEnumerable<UnitState> GetLivingTeam(string team) =>
         Units.Where(u => u.IsAlive && u.Team == team);

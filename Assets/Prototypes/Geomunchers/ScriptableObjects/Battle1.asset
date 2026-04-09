@@ -1,0 +1,27 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cfa51693a33803d4a912cd87a0dd11f2, type: 3}
+  m_Name: Battle1
+  m_EditorClassIdentifier: Assembly-CSharp::BattleDefinition
+  <Id>k__BackingField: battle1
+  <DisplayName>k__BackingField: Battle 1
+  <Enemies>k__BackingField:
+  - {fileID: 11400000, guid: b19a6400c004f3342b53f571efad0e24, type: 2}
+  - {fileID: 11400000, guid: b19a6400c004f3342b53f571efad0e24, type: 2}
+  <TurnOrderStrategy>k__BackingField: {fileID: 11400000, guid: 0ca9b9f4520c1224bbe3298d424a3d47, type: 2}
+  <DeathConditionStrategy>k__BackingField: {fileID: 0}
+  <GlobalTurnEffects>k__BackingField:
+  - {fileID: 11400000, guid: 4b829812349901e4b838b37c31720eb2, type: 2}
+  <StartingGlobalResources>k__BackingField: []
+  <StartingPools>k__BackingField:
+  - {fileID: 11400000, guid: a1a96a11be2cc5941977205a9d4641db, type: 2}
+  - {fileID: 11400000, guid: 64a5dca0abee4f34fbb7e40e00b1a23b, type: 2}

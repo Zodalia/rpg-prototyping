@@ -14,6 +14,9 @@ public sealed class ResourceDefinition : ScriptableObject
     [field: SerializeField] public int DefaultMaxValue { get; private set; } = -1;
 
     [field: SerializeField] public List<ResourceOwnershipScope> AllowedScopes { get; private set; } = new();
+    [field: SerializeField] public List<ResourceTag> Tags { get; private set; } = new();
+
+    public bool HasTag(ResourceTag tag) => tag != null && Tags != null && Tags.Contains(tag);
 
     // Kept for backwards compatibility / migration. Hidden from the inspector.
     [HideInInspector]

@@ -1,0 +1,30 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b4734ebd6955d114b8fd85811864b7ba, type: 3}
+  m_Name: PanSlap
+  m_EditorClassIdentifier: Assembly-CSharp::ActionDefinition
+  <Id>k__BackingField: panslap
+  <DisplayName>k__BackingField: Pan Slap
+  <Description>k__BackingField: 
+  <Targeting>k__BackingField: 2
+  <Cooldown>k__BackingField: 0
+  <ResourceRequirements>k__BackingField: []
+  <Effects>k__BackingField:
+  - rid: 6263732149388050496
+  references:
+    version: 2
+    RefIds:
+    - rid: 6263732149388050496
+      type: {class: DamageEffectConfig, ns: , asm: Assembly-CSharp}
+      data:
+        targetOverride: 0
+        power: 1

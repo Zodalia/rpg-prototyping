@@ -1,0 +1,34 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b4734ebd6955d114b8fd85811864b7ba, type: 3}
+  m_Name: BerryBlast
+  m_EditorClassIdentifier: Assembly-CSharp::ActionDefinition
+  <Id>k__BackingField: berryblast
+  <DisplayName>k__BackingField: Berry Blast
+  <Description>k__BackingField: 
+  <Targeting>k__BackingField: 2
+  <Cooldown>k__BackingField: 0
+  <ResourceRequirements>k__BackingField:
+  - resource: {fileID: 11400000, guid: 486901e2a39442f4c854b9aa96644728, type: 2}
+    amount: 1
+    spendPriorityOverride: 
+    tag: {fileID: 0}
+  <Effects>k__BackingField:
+  - rid: 6263732149388050497
+  references:
+    version: 2
+    RefIds:
+    - rid: 6263732149388050497
+      type: {class: DamageEffectConfig, ns: , asm: Assembly-CSharp}
+      data:
+        targetOverride: 0
+        power: 2

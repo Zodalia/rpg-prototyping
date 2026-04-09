@@ -9,14 +9,27 @@ public static class ActionPreviewSimulator
 
         try
         {
-            var targets = ResolvePreviewTargets(action, actor, target);
-
             var events = new List<BattleEvent>();
             sandbox.EventBus.EventRaised += e => events.Add(e);
 
             var rules = new CombatRules();
             var executor = new ActionExecutor();
-            executor.Execute(sandbox, new ActionExecution(actor, action, targets), rules);
+
+            ActionExecution execution;
+            if (action.Targeting == ActionDefinition.TargetType.Pool)
+            {
+                var dummyPool = GetOrCreateDummyPool(sandbox, action);
+                execution = dummyPool != null
+                    ? new ActionExecution(actor, action, dummyPool)
+                    : new ActionExecution(actor, action, new List<UnitState>());
+            }
+            else
+            {
+                var targets = ResolvePreviewTargets(action, actor, target);
+                execution = new ActionExecution(actor, action, targets);
+            }
+
+            executor.Execute(sandbox, execution, rules);
 
             var lines = new List<string>();
             foreach (var e in events)
@@ -31,6 +44,15 @@ public static class ActionPreviewSimulator
         {
             Object.Destroy(dummyDef);
         }
+    }
+
+    private static PoolInstance GetOrCreateDummyPool(BattleState sandbox, ActionDefinition action)
+    {
+        // Use first active pool if any exist
+        foreach (var pool in sandbox.Pools)
+            if (!pool.IsDepleted) return pool;
+
+        return null;
     }
 
     private static (BattleState sandbox, UnitState actor, UnitState target, UnitDefinition dummyDef)
@@ -74,6 +96,10 @@ public static class ActionPreviewSimulator
             sandbox.GlobalResources[resKvp.Key] = new ResourceInstance(
                 resKvp.Value.Definition, resKvp.Value.CurrentValue, resKvp.Value.MaxValue);
 
+        // Clone pools
+        foreach (var pool in realState.Pools)
+            sandbox.Pools.Add(new PoolInstance(pool.PoolId, pool.Definition, pool.RemainingHarvests));
+
         return (sandbox, actor, target, dummyDef);
     }
 
@@ -108,6 +134,10 @@ public static class ActionPreviewSimulator
                 FormatResourceChanged(res),
             StatusAppliedEvent status =>
                 $"{RoleName(status.Target, actor, target)} gains {status.Status.DisplayName} ({status.Duration} turns)",
+            PoolHarvestedEvent poolHarvest =>
+                $"Harvest {poolHarvest.Amount} {poolHarvest.Resource.DisplayName} from {poolHarvest.Pool.Definition.DisplayName}",
+            PoolDepletedEvent poolDepleted =>
+                $"{poolDepleted.Pool.Definition.DisplayName} depleted",
             _ => null,
         };
     }
