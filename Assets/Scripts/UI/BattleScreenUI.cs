@@ -42,6 +42,8 @@ public sealed class BattleScreenUI : MonoBehaviour
     private ScrollView _combatLog;
     private VisualElement _combatLogContent;
     private VisualElement _resourceBar;
+    private VisualElement _allyTeamResources;
+    private VisualElement _enemyTeamResources;
     private VisualElement _turnTracker;
     private VisualElement _previewPanel;
     private VisualElement _poolContainer;
@@ -124,6 +126,8 @@ public sealed class BattleScreenUI : MonoBehaviour
         _combatLog = _root.Q<ScrollView>("combat-log");
         _combatLogContent = _root.Q("combat-log-content");
         _resourceBar = _root.Q("resource-bar");
+        _allyTeamResources = _root.Q("ally-team-resources");
+        _enemyTeamResources = _root.Q("enemy-team-resources");
         _turnTracker = _root.Q("turn-tracker");
         _poolContainer = _root.Q("pool-container");
 
@@ -309,6 +313,8 @@ public sealed class BattleScreenUI : MonoBehaviour
     private void RefreshResourceBar()
     {
         _resourceBar.Clear();
+        _allyTeamResources.Clear();
+        _enemyTeamResources.Clear();
 
         var state = battleController.State;
         if (state == null) return;
@@ -319,18 +325,31 @@ public sealed class BattleScreenUI : MonoBehaviour
             SpawnResourceEntry(_resourceBar, kvp.Value);
         }
 
-        foreach (var teamKvp in state.TeamResources.Where(
-            kvp => kvp.Value.Values.Any(
-                res => res.Definition != null && res.Definition.PlayerFacing)))
-        {
-            foreach (var resKvp in teamKvp.Value)
-                SpawnResourceEntry(_resourceBar, resKvp.Value);
-        }
-
         if (_resourceBar.childCount > 0)
             _resourceBar.RemoveFromClassList("hidden");
         else
             _resourceBar.AddToClassList("hidden");
+
+        foreach (var teamKvp in state.TeamResources)
+        {
+            var container = teamKvp.Key == "Player" ? _allyTeamResources : _enemyTeamResources;
+            foreach (var resKvp in teamKvp.Value.Where(
+                kvp => kvp.Value.Definition != null && kvp.Value.Definition.PlayerFacing))
+            {
+                SpawnResourceEntry(container, resKvp.Value);
+            }
+        }
+
+        ToggleHidden(_allyTeamResources, _allyTeamResources.childCount == 0);
+        ToggleHidden(_enemyTeamResources, _enemyTeamResources.childCount == 0);
+    }
+
+    private static void ToggleHidden(VisualElement el, bool hidden)
+    {
+        if (hidden)
+            el.AddToClassList("hidden");
+        else
+            el.RemoveFromClassList("hidden");
     }
 
     private void SpawnResourceEntry(VisualElement parent, ResourceInstance resource)

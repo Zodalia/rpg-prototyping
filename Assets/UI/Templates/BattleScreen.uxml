@@ -2,14 +2,17 @@
     <Style src="../Styles/battle.uss" />
 
     <ui:VisualElement name="battle-root">
-        <!-- Global / team resource bar — always visible at top -->
+        <!-- Global resource bar — always visible at top -->
         <ui:VisualElement name="resource-bar" class="hidden" />
 
         <!-- Mid section: turn tracker (left) + battlefield (center) -->
         <ui:VisualElement name="mid-section">
             <ui:VisualElement name="turn-tracker" />
             <ui:VisualElement name="battlefield">
-                <ui:VisualElement name="enemy-column" />
+                <ui:VisualElement name="enemy-section">
+                    <ui:VisualElement name="enemy-team-resources" class="team-resource-bar hidden" />
+                    <ui:VisualElement name="enemy-column" />
+                </ui:VisualElement>
                 <ui:VisualElement name="pool-container" class="hidden" />
             </ui:VisualElement>
         </ui:VisualElement>
@@ -22,7 +25,10 @@
             <ui:ScrollView name="combat-log" vertical-scroller-visibility="Auto">
                 <ui:VisualElement name="combat-log-content" />
             </ui:ScrollView>
-            <ui:VisualElement name="ally-column" />
+            <ui:VisualElement name="ally-section">
+                <ui:VisualElement name="ally-team-resources" class="team-resource-bar hidden" />
+                <ui:VisualElement name="ally-column" />
+            </ui:VisualElement>
         </ui:VisualElement>
     </ui:VisualElement>
 </ui:UXML>
