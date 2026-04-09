@@ -18,9 +18,10 @@ MonoBehaviour:
   <IconColor>k__BackingField:
     serializedVersion: 2
     rgba: 4294967295
-  <PlayerFacing>k__BackingField: 1
+  <PlayerFacing>k__BackingField: 0
   <DefaultValue>k__BackingField: 0
   <DecayPerTurn>k__BackingField: 0
   <DefaultMaxValue>k__BackingField: -1
   <AllowedScopes>k__BackingField: 00000000
+  <Tags>k__BackingField: []
   <OwnershipScope>k__BackingField: 0
