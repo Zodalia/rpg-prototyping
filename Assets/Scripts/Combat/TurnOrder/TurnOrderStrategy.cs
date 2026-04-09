@@ -112,8 +112,8 @@ public abstract class TurnOrderStrategy : ScriptableObject
         ResourceSnapshot snapshot, BattleState state, CombatRules simRules,
         EnemyAi enemyAi, UnitState unit, ActionDefinition overrideAction)
     {
-        ActionDefinition action;
-        List<UnitState> targets;
+        ActionDefinition action = null;
+        List<UnitState> targets = new List<UnitState>();
 
         if (overrideAction != null)
         {
@@ -131,13 +131,9 @@ public abstract class TurnOrderStrategy : ScriptableObject
                 action = prediction.Action;
                 targets = prediction.Targets;
             }
-            else
-            {
-                action = available[0];
-                targets = ActionSimulator.ResolveDefaultTargets(state, unit, action);
-            }
         }
 
+        if (action == null) return;
         ActionSimulator.SimulateResourceEffects(snapshot, state, unit, action, targets);
     }
 }

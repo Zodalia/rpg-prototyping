@@ -14,6 +14,13 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::ResourceDefinition
   <Id>k__BackingField: delay
   <DisplayName>k__BackingField: Delay
+  <Icon>k__BackingField: {fileID: 0}
+  <IconColor>k__BackingField:
+    serializedVersion: 2
+    rgba: 4294967295
+  <PlayerFacing>k__BackingField: 1
   <DefaultValue>k__BackingField: 0
   <DecayPerTurn>k__BackingField: 0
+  <DefaultMaxValue>k__BackingField: -1
+  <AllowedScopes>k__BackingField: 00000000
   <OwnershipScope>k__BackingField: 0

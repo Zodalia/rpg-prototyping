@@ -13,7 +13,7 @@ public static class ActionSimulator
             if (req.Resource == null)
                 continue;
 
-            snapshot.SpendResource(state, actor, req.Resource, req.Amount);
+            snapshot.SpendResource(state, actor, req.Resource, req.Amount, req.SpendPriority);
         }
 
         // Simulate resource-affecting effects
@@ -25,17 +25,17 @@ public static class ActionSimulator
             {
                 case GainResourceEffectConfig gain when gain.Resource != null:
                     foreach (var target in effectTargets)
-                        snapshot.GainResource(state, target, gain.Resource, gain.Amount);
+                        snapshot.GainResource(state, target, gain.Resource, gain.Amount, gain.GainPriority);
                     break;
 
                 case SpendResourceEffectConfig spend when spend.Resource != null:
                     foreach (var target in effectTargets)
-                        snapshot.SpendResource(state, target, spend.Resource, spend.Amount);
+                        snapshot.SpendResource(state, target, spend.Resource, spend.Amount, spend.SpendPriority);
                     break;
 
                 case SetResourceEffectConfig set when set.Resource != null:
                     foreach (var target in effectTargets)
-                        snapshot.SetResource(state, target, set.Resource, set.Value);
+                        snapshot.SetResource(state, target, set.Resource, set.Value, set.TargetScope);
                     break;
             }
         }
@@ -88,17 +88,17 @@ public static class ActionSimulator
                 {
                     case GainResourceEffectConfig gain when gain.Resource != null:
                         foreach (var target in targets)
-                            snapshot.GainResource(state, target, gain.Resource, gain.Amount);
+                            snapshot.GainResource(state, target, gain.Resource, gain.Amount, gain.GainPriority);
                         break;
 
                     case SpendResourceEffectConfig spend when spend.Resource != null:
                         foreach (var target in targets)
-                            snapshot.SpendResource(state, target, spend.Resource, spend.Amount);
+                            snapshot.SpendResource(state, target, spend.Resource, spend.Amount, spend.SpendPriority);
                         break;
 
                     case SetResourceEffectConfig set when set.Resource != null:
                         foreach (var target in targets)
-                            snapshot.SetResource(state, target, set.Resource, set.Value);
+                            snapshot.SetResource(state, target, set.Resource, set.Value, set.TargetScope);
                         break;
                 }
             }

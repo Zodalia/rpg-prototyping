@@ -42,6 +42,7 @@ public sealed class BattleScreenUI : MonoBehaviour
     private VisualElement _combatLogContent;
     private VisualElement _resourceBar;
     private VisualElement _turnTracker;
+    private VisualElement _previewPanel;
 
     // State
     private readonly List<UnitCardController> _unitCards = new();
@@ -121,6 +122,12 @@ public sealed class BattleScreenUI : MonoBehaviour
         _combatLogContent = _root.Q("combat-log-content");
         _resourceBar = _root.Q("resource-bar");
         _turnTracker = _root.Q("turn-tracker");
+
+        _previewPanel = new VisualElement();
+        _previewPanel.AddToClassList("action-preview-panel");
+        _previewPanel.AddToClassList("hidden");
+        _previewPanel.pickingMode = PickingMode.Ignore;
+        _root.Add(_previewPanel);
     }
 
     // ─────────────────────── Event Handlers ───────────────────────
@@ -448,8 +455,16 @@ public sealed class BattleScreenUI : MonoBehaviour
 
             var captured = action;
             button.clicked += () => OnActionChosen(captured);
-            button.RegisterCallback<MouseEnterEvent>(_ => RefreshTurnTracker(captured));
-            button.RegisterCallback<MouseLeaveEvent>(_ => RefreshTurnTracker(null));
+            button.RegisterCallback<MouseEnterEvent>(_ =>
+            {
+                RefreshTurnTracker(captured);
+                ShowPreview(captured, button);
+            });
+            button.RegisterCallback<MouseLeaveEvent>(_ =>
+            {
+                RefreshTurnTracker(null);
+                HidePreview();
+            });
 
             _actionBar.Add(tree);
         }
@@ -536,6 +551,8 @@ public sealed class BattleScreenUI : MonoBehaviour
 
     private void ClearActionButtons()
     {
+        HidePreview();
+
         // Remove all action buttons but keep the cancel button
         var toRemove = new List<VisualElement>();
         foreach (var child in _actionBar.Children())
@@ -545,6 +562,45 @@ public sealed class BattleScreenUI : MonoBehaviour
         }
         foreach (var el in toRemove)
             _actionBar.Remove(el);
+    }
+
+    private void ShowPreview(ActionDefinition action, VisualElement button)
+    {
+        if (_pendingActor == null || battleController.State == null)
+            return;
+
+        var lines = ActionPreviewSimulator.Simulate(battleController.State, _pendingActor, action);
+        if (lines.Count == 0)
+        {
+            HidePreview();
+            return;
+        }
+
+        _previewPanel.Clear();
+        foreach (var line in lines)
+        {
+            var label = new Label(line);
+            label.AddToClassList("action-preview-line");
+            label.pickingMode = PickingMode.Ignore;
+            _previewPanel.Add(label);
+        }
+
+        _previewPanel.RemoveFromClassList("hidden");
+
+        // Position to the right of the hovered button
+        _previewPanel.schedule.Execute(() =>
+        {
+            var btnRect = button.worldBound;
+            var rootRect = _root.worldBound;
+            _previewPanel.style.left = btnRect.xMax - rootRect.x + 8;
+            _previewPanel.style.top = btnRect.y - rootRect.y;
+        });
+    }
+
+    private void HidePreview()
+    {
+        _previewPanel.AddToClassList("hidden");
+        _previewPanel.Clear();
     }
 
     private void ClearTargeting()

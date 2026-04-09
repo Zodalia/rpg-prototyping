@@ -6,9 +6,11 @@ public sealed class SetResourceEffectConfig : EffectConfig
 {
     [SerializeField] private ResourceDefinition resource;
     [SerializeField] private int value;
+    [SerializeField] private ResourceOwnershipScope targetScope;
 
     public ResourceDefinition Resource => resource;
     public int Value => value;
+    public ResourceOwnershipScope TargetScope => targetScope;
 
     public override string DisplayName => "Set Resource";
 
@@ -19,7 +21,7 @@ public sealed class SetResourceEffectConfig : EffectConfig
 
         foreach (var target in ResolveTargets(state, execution))
         {
-            rules.SetResource(state, target, resource, value);
+            rules.SetResource(state, target, resource, value, targetScope);
         }
     }
 }

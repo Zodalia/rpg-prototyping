@@ -20,19 +20,15 @@ MonoBehaviour:
   <ResourceRequirements>k__BackingField:
   - resource: {fileID: 11400000, guid: 2035e1a71aa5c2d4ebd6a15710094bb5, type: 2}
     amount: 2
+    spendPriorityOverride: 
   <Effects>k__BackingField:
   - rid: 4305622216186527803
-  - rid: 4305622238362861633
   references:
     version: 2
     RefIds:
     - rid: 4305622216186527803
       type: {class: ApplyStatusEffectConfig, ns: , asm: Assembly-CSharp}
       data:
+        targetOverride: 0
         status: {fileID: 11400000, guid: fdfaf509c304d2148a8090dbd0d18664, type: 2}
-        duration: 3
-    - rid: 4305622238362861633
-      type: {class: GainResourceEffectConfig, ns: , asm: Assembly-CSharp}
-      data:
-        resource: {fileID: 11400000, guid: d943ed5ad5db6ba4883f801e78b5b7a9, type: 2}
-        amount: 5
+        duration: 1

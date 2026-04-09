@@ -10,6 +10,7 @@ public sealed class BattleDefinition : ScriptableObject
 
     [field: SerializeField] public List<UnitDefinition> Enemies { get; private set; } = new();
     [field: SerializeField] public TurnOrderStrategy TurnOrderStrategy { get; private set; }
+    [field: SerializeField] public DeathConditionStrategy DeathConditionStrategy { get; private set; }
     [field: SerializeField] public List<TurnEffectDefinition> GlobalTurnEffects { get; private set; } = new();
     [field: SerializeField] public List<GlobalResourceEntry> StartingGlobalResources { get; private set; } = new();
 }

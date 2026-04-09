@@ -20,17 +20,13 @@ MonoBehaviour:
   <ResourceRequirements>k__BackingField: []
   <Effects>k__BackingField:
   - rid: 4305622238362861628
-  - rid: 4305622238362861629
   references:
     version: 2
     RefIds:
     - rid: 4305622238362861628
       type: {class: GainResourceEffectConfig, ns: , asm: Assembly-CSharp}
       data:
+        targetOverride: 0
         resource: {fileID: 11400000, guid: 2035e1a71aa5c2d4ebd6a15710094bb5, type: 2}
         amount: 1
-    - rid: 4305622238362861629
-      type: {class: GainResourceEffectConfig, ns: , asm: Assembly-CSharp}
-      data:
-        resource: {fileID: 11400000, guid: d943ed5ad5db6ba4883f801e78b5b7a9, type: 2}
-        amount: 3
+        gainPriorityOverride: 

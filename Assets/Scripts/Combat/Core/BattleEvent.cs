@@ -132,13 +132,16 @@ public sealed class ResourceChangedEvent : BattleEvent
     public ResourceDefinition Resource { get; }
     public int OldValue { get; }
     public int NewValue { get; }
+    public ResourceOwnershipScope Scope { get; }
 
-    public ResourceChangedEvent(int turnNumber, UnitState unit, ResourceDefinition resource, int oldValue, int newValue)
+    public ResourceChangedEvent(int turnNumber, UnitState unit, ResourceDefinition resource, int oldValue, int newValue,
+        ResourceOwnershipScope scope = ResourceOwnershipScope.Unit)
         : base(turnNumber)
     {
         Unit = unit;
         Resource = resource;
         OldValue = oldValue;
         NewValue = newValue;
+        Scope = scope;
     }
 }

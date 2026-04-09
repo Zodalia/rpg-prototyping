@@ -7,6 +7,7 @@ public sealed class BattleController : MonoBehaviour
 {
     public BattleState State { get; private set; }
     public TurnOrderStrategy TurnOrderStrategy { get; private set; }
+    public DeathConditionStrategy DeathConditionStrategy { get; private set; }
     public EnemyAi EnemyAi => _enemyAi;
     public List<TurnEffectDefinition> GlobalTurnEffects { get; private set; } = new();
     public BattleDefinition CurrentBattle { get; private set; }
@@ -36,7 +37,10 @@ public sealed class BattleController : MonoBehaviour
         State.EventBus = new BattleEventBus();
 
         TurnOrderStrategy = battle.TurnOrderStrategy;
+        DeathConditionStrategy = battle.DeathConditionStrategy;
         GlobalTurnEffects = battle.GlobalTurnEffects ?? new List<TurnEffectDefinition>();
+
+        _rules.DeathCondition = DeathConditionStrategy;
 
         foreach (var entry in battle.StartingGlobalResources)
         {

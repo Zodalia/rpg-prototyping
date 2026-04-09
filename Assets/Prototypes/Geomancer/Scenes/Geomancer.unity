@@ -639,7 +639,7 @@ MonoBehaviour:
   statusIconTemplate: {fileID: 9197481963319205126, guid: 23dc517587073a043a01a8f7b22d412c, type: 3}
   resourceEntryTemplate: {fileID: 9197481963319205126, guid: 306416ca0fed1eb43a3f390388f98980, type: 3}
   battleSelectTemplate: {fileID: 9197481963319205126, guid: 8eef2f7feac11eb40833f062b962239f, type: 3}
-  showUnitResources: 0
+  showUnitResources: 1
   turnTrackerEntryTemplate: {fileID: 9197481963319205126, guid: 1ba4185395011ce4ab42c6d41ffa376f, type: 3}
   turnPreviewCount: 8
   groupDelay: 1

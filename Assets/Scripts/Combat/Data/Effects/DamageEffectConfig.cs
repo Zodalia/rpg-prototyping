@@ -15,15 +15,8 @@ public sealed class DamageEffectConfig : EffectConfig
             int damage = rules.CalculateDamage(execution.Actor, target, power + execution.PowerModifier);
             target.Hp -= damage;
 
-            bool isLethal = target.Hp <= 0;
+            bool isLethal = rules.CheckAndApplyDeath(state, target, execution.Actor);
             state.EventBus.Raise(new DamageDealtEvent(state.TurnNumber, execution.Actor, target, damage, isLethal));
-
-            if (isLethal)
-            {
-                target.Hp = 0;
-                target.IsAlive = false;
-                state.EventBus.Raise(new UnitDefeatedEvent(state.TurnNumber, target, execution.Actor));
-            }
         }
     }
 }

@@ -12,7 +12,7 @@ public sealed class ActionExecutor
             if (req.Resource == null)
                 continue;
 
-            rules.SpendResource(state, actor, req.Resource.Id, req.Amount);
+            rules.SpendResource(state, actor, req.Resource, req.Amount, req.SpendPriority);
         }
 
         if (action.Cooldown > 0)

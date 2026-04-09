@@ -21,4 +21,6 @@ MonoBehaviour:
   <PlayerFacing>k__BackingField: 1
   <DefaultValue>k__BackingField: 0
   <DecayPerTurn>k__BackingField: 0
+  <DefaultMaxValue>k__BackingField: -1
+  <AllowedScopes>k__BackingField: 0000000002000000
   <OwnershipScope>k__BackingField: 2

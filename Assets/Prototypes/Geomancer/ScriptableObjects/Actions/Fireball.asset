@@ -20,10 +20,10 @@ MonoBehaviour:
   <ResourceRequirements>k__BackingField:
   - resource: {fileID: 11400000, guid: 33efa4d68c2eb564e85d0fc55e51f984, type: 2}
     amount: 4
+    spendPriorityOverride: 
   <Effects>k__BackingField:
   - rid: 4305622238362861630
   - rid: 4305622238362861631
-  - rid: 4305622238362861637
   references:
     version: 2
     RefIds:
@@ -37,10 +37,5 @@ MonoBehaviour:
       data:
         targetOverride: 1
         resource: {fileID: 11400000, guid: d943ed5ad5db6ba4883f801e78b5b7a9, type: 2}
-        amount: 10
-    - rid: 4305622238362861637
-      type: {class: SpendResourceEffectConfig, ns: , asm: Assembly-CSharp}
-      data:
-        targetOverride: 0
-        resource: {fileID: 11400000, guid: 33efa4d68c2eb564e85d0fc55e51f984, type: 2}
-        amount: 4
+        amount: 3
+        gainPriorityOverride: 

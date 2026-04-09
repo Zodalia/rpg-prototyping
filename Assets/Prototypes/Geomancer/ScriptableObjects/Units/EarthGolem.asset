@@ -22,6 +22,12 @@ MonoBehaviour:
     initialValue: 2
     resetToValueOnTurnStart: 0
     turnStartValue: 1
+    maxValue: 0
+  - resource: {fileID: 11400000, guid: 2035e1a71aa5c2d4ebd6a15710094bb5, type: 2}
+    initialValue: 2
+    resetToValueOnTurnStart: 0
+    turnStartValue: 1
+    maxValue: 2
   <Actions>k__BackingField:
   - {fileID: 11400000, guid: ef901d81dd941d1408933df2994b152f, type: 2}
   - {fileID: 11400000, guid: c2651d4f687adf44ea13ed09aedec7aa, type: 2}

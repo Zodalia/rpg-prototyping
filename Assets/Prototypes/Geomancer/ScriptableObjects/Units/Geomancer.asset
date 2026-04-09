@@ -22,8 +22,15 @@ MonoBehaviour:
     initialValue: 0
     resetToValueOnTurnStart: 0
     turnStartValue: 0
+    maxValue: 0
+  - resource: {fileID: 11400000, guid: 33efa4d68c2eb564e85d0fc55e51f984, type: 2}
+    initialValue: 1
+    resetToValueOnTurnStart: 0
+    turnStartValue: 0
+    maxValue: 1
   <Actions>k__BackingField:
   - {fileID: 11400000, guid: cb486218b6e668c4a8813f4bdf75d2d3, type: 2}
   - {fileID: 11400000, guid: 14da1224c47b516459f4ddcb84299c20, type: 2}
   - {fileID: 11400000, guid: ef901d81dd941d1408933df2994b152f, type: 2}
   - {fileID: 11400000, guid: c2651d4f687adf44ea13ed09aedec7aa, type: 2}
+  <TurnEffects>k__BackingField: []

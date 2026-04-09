@@ -14,57 +14,138 @@ public sealed class ResourceSnapshot
 
     public int GetResource(BattleState state, UnitState unit, string resourceId)
     {
-        // Unit scope: check override, then real
+        // Legacy string-only path: find definition, then aggregate.
+        var definition = FindDefinition(state, unit, resourceId);
+        if (definition != null)
+            return GetResource(state, unit, definition);
+
+        // Fallback: try each scope with override → real.
         string unitKey = UnitKey(unit.UnitId, resourceId);
-        if (_overrides.TryGetValue(unitKey, out int uVal))
-            return uVal;
-        if (unit.Resources.TryGetValue(resourceId, out var unitRes))
-            return unitRes.CurrentValue;
+        if (_overrides.TryGetValue(unitKey, out int uVal)) return uVal;
+        if (unit.Resources.TryGetValue(resourceId, out var unitRes)) return unitRes.CurrentValue;
 
-        // Team scope: check override, then real
         string teamKey = TeamKey(unit.Team, resourceId);
-        if (_overrides.TryGetValue(teamKey, out int tVal))
-            return tVal;
+        if (_overrides.TryGetValue(teamKey, out int tVal)) return tVal;
         if (state.TeamResources.TryGetValue(unit.Team, out var teamDict) &&
-            teamDict.TryGetValue(resourceId, out var teamRes))
-            return teamRes.CurrentValue;
+            teamDict.TryGetValue(resourceId, out var teamRes)) return teamRes.CurrentValue;
 
-        // Global scope: check override, then real
         string globalKey = GlobalKey(resourceId);
-        if (_overrides.TryGetValue(globalKey, out int gVal))
-            return gVal;
-        if (state.GlobalResources.TryGetValue(resourceId, out var globalRes))
-            return globalRes.CurrentValue;
+        if (_overrides.TryGetValue(globalKey, out int gVal)) return gVal;
+        if (state.GlobalResources.TryGetValue(resourceId, out var globalRes)) return globalRes.CurrentValue;
 
         return 0;
     }
 
-    public void GainResource(BattleState state, UnitState unit, ResourceDefinition resource, int amount)
+    public int GetResource(BattleState state, UnitState unit, ResourceDefinition resource)
     {
-        int current = GetResource(state, unit, resource.Id);
-        _overrides[ScopedKey(unit, resource)] = current + amount;
+        int total = 0;
+        foreach (var scope in resource.AllowedScopes)
+            total += GetScopedValue(state, unit, resource.Id, scope);
+        return total;
     }
 
-    public void SpendResource(BattleState state, UnitState unit, ResourceDefinition resource, int amount)
+    public void GainResource(BattleState state, UnitState unit, ResourceDefinition resource, int amount,
+        IReadOnlyList<ResourceOwnershipScope> gainPriority = null)
     {
-        int current = GetResource(state, unit, resource.Id);
-        _overrides[ScopedKey(unit, resource)] = Mathf.Max(0, current - amount);
-    }
+        var priority = gainPriority ?? resource.AllowedScopes;
+        int remaining = amount;
 
-    public void SetResource(BattleState state, UnitState unit, ResourceDefinition resource, int value)
-    {
-        _overrides[ScopedKey(unit, resource)] = value;
-    }
-
-    private string ScopedKey(UnitState unit, ResourceDefinition resource)
-    {
-        return resource.OwnershipScope switch
+        foreach (var scope in priority)
         {
-            ResourceOwnershipScope.Unit => UnitKey(unit.UnitId, resource.Id),
-            ResourceOwnershipScope.Team => TeamKey(unit.Team, resource.Id),
-            ResourceOwnershipScope.Global => GlobalKey(resource.Id),
-            _ => UnitKey(unit.UnitId, resource.Id)
+            if (remaining <= 0) break;
+
+            int current = GetScopedValue(state, unit, resource.Id, scope);
+            int maxValue = GetMaxValue(state, unit, resource, scope);
+            int space = maxValue >= 0 ? maxValue - current : int.MaxValue;
+            int gain = space < remaining ? space : remaining;
+            if (gain <= 0) continue;
+
+            _overrides[ScopedKey(unit, resource.Id, scope)] = current + gain;
+            remaining -= gain;
+        }
+    }
+
+    public void SpendResource(BattleState state, UnitState unit, ResourceDefinition resource, int amount,
+        IReadOnlyList<ResourceOwnershipScope> spendPriority = null)
+    {
+        var priority = spendPriority ?? resource.AllowedScopes;
+        int remaining = amount;
+
+        foreach (var scope in priority)
+        {
+            if (remaining <= 0) break;
+
+            int current = GetScopedValue(state, unit, resource.Id, scope);
+            if (current <= 0) continue;
+
+            int drain = current < remaining ? current : remaining;
+            _overrides[ScopedKey(unit, resource.Id, scope)] = current - drain;
+            remaining -= drain;
+        }
+    }
+
+    public void SetResource(BattleState state, UnitState unit, ResourceDefinition resource, int value,
+        ResourceOwnershipScope scope)
+    {
+        _overrides[ScopedKey(unit, resource.Id, scope)] = value;
+    }
+
+    private int GetScopedValue(BattleState state, UnitState unit, string resourceId,
+        ResourceOwnershipScope scope)
+    {
+        string key = ScopedKey(unit, resourceId, scope);
+        if (_overrides.TryGetValue(key, out int val))
+            return val;
+
+        return scope switch
+        {
+            ResourceOwnershipScope.Unit =>
+                unit.Resources.TryGetValue(resourceId, out var u) ? u.CurrentValue : 0,
+            ResourceOwnershipScope.Team =>
+                state.TeamResources.TryGetValue(unit.Team, out var td) &&
+                td.TryGetValue(resourceId, out var t) ? t.CurrentValue : 0,
+            ResourceOwnershipScope.Global =>
+                state.GlobalResources.TryGetValue(resourceId, out var g) ? g.CurrentValue : 0,
+            _ => 0
         };
+    }
+
+    private int GetMaxValue(BattleState state, UnitState unit, ResourceDefinition resource,
+        ResourceOwnershipScope scope)
+    {
+        // Try to read MaxValue from the real pool; fall back to the definition default.
+        ResourceInstance pool = scope switch
+        {
+            ResourceOwnershipScope.Unit =>
+                unit.Resources.TryGetValue(resource.Id, out var u) ? u : null,
+            ResourceOwnershipScope.Team =>
+                state.TeamResources.TryGetValue(unit.Team, out var td) &&
+                td.TryGetValue(resource.Id, out var t) ? t : null,
+            ResourceOwnershipScope.Global =>
+                state.GlobalResources.TryGetValue(resource.Id, out var g) ? g : null,
+            _ => null
+        };
+        return pool?.MaxValue ?? resource.DefaultMaxValue;
+    }
+
+    private static string ScopedKey(UnitState unit, string resourceId, ResourceOwnershipScope scope)
+    {
+        return scope switch
+        {
+            ResourceOwnershipScope.Unit => UnitKey(unit.UnitId, resourceId),
+            ResourceOwnershipScope.Team => TeamKey(unit.Team, resourceId),
+            ResourceOwnershipScope.Global => GlobalKey(resourceId),
+            _ => UnitKey(unit.UnitId, resourceId)
+        };
+    }
+
+    private static ResourceDefinition FindDefinition(BattleState state, UnitState unit, string resourceId)
+    {
+        if (unit.Resources.TryGetValue(resourceId, out var u)) return u.Definition;
+        if (state.TeamResources.TryGetValue(unit.Team, out var td) &&
+            td.TryGetValue(resourceId, out var t)) return t.Definition;
+        if (state.GlobalResources.TryGetValue(resourceId, out var g)) return g.Definition;
+        return null;
     }
 
     private static string UnitKey(string unitId, string resourceId) => $"U:{unitId}:{resourceId}";
